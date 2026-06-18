@@ -52,3 +52,24 @@ begin
     execute format('create policy "auth read" on public.%I for select using (auth.role() = ''authenticated'');', t);
   end loop;
 end $$;
+
+-- ── Opgave 4: kanal/platform-dimensioner + automatik ──
+-- Kanal-attribution: ét punkt på videos; costlog & stats_daily joiner via video_id.
+alter table public.videos add column if not exists channel_id text;
+
+-- Indtjening på tværs af platforme (penge). service_role skriver (cron/n8n), login læser.
+create table if not exists public.earnings (
+  id bigserial primary key,
+  channel_id text, platform text, date date, usd numeric, source text,
+  ts timestamptz default now()
+);
+alter table public.earnings enable row level security;
+drop policy if exists "auth read" on public.earnings;
+create policy "auth read" on public.earnings
+  for select using (auth.role() = 'authenticated');
+
+-- Naturlige nøgler → idempotent upsert (cron + n8n-sync via PostgREST merge-duplicates)
+create unique index if not exists stats_daily_video_date_uidx on public.stats_daily (video_id, date);
+create unique index if not exists costlog_video_step_uidx on public.costlog (video_id, step);
+create unique index if not exists qc_log_case_ts_uidx on public.qc_log (case_id, ts);
+create unique index if not exists earnings_channel_platform_date_uidx on public.earnings (channel_id, platform, date);

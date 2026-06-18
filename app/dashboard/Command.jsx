@@ -341,6 +341,7 @@ export default function SomiCommand() {
   const [earnings, setEarnings] = useState(SEED_EARNINGS);
   const [newEarn, setNewEarn] = useState({ source: "youtube", month: new Date().toISOString().slice(0, 7), usd: "", channelId: "ch1" });
   const [econChan, setEconChan] = useState("all");
+  const [pipelineAuto, setPipelineAuto] = useState(false);
 
   // ── Load ──
   useEffect(() => {
@@ -368,6 +369,18 @@ export default function SomiCommand() {
         }
       }
       if (Array.isArray(ea)) setEarnings(ea);
+
+      // Tabel-drevet økonomi (n8n-sync + YouTube-cron). Overskriver manuel KV når der findes pipeline-data.
+      try {
+        const pres = await fetch("/api/pipeline");
+        if (pres.ok) {
+          const pj = await pres.json();
+          if (Array.isArray(pj.costs) && pj.costs.length) setCosts(pj.costs);
+          if (Array.isArray(pj.earnings) && pj.earnings.length) setEarnings(pj.earnings);
+          setPipelineAuto(!!(pj.counts && (pj.counts.costlog || pj.counts.earnings)));
+        }
+      } catch (e) { /* pipeline ikke tilgængelig — behold manuel/KV */ }
+
       setLoaded(true);
     })();
   }, []);
@@ -1593,7 +1606,10 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "okonomi" && (
           <>
             <div className="sc-lede" style={{ marginTop: 28 }}>
-              Indtjening og kost — pr. kilde og pr. kanal. Vælg en enkelt kanal eller se alt samlet. Netto = indtjening − kost. Tallene er manuelle indtil YouTube/Facebook Analytics kobles på i Fase 3.
+              Indtjening og kost — pr. kilde og pr. kanal. Vælg en enkelt kanal eller se alt samlet. Netto = indtjening − kost.{" "}
+              {pipelineAuto
+                ? "Tallene kommer automatisk fra pipelinen (costlog via n8n, indtjening via YouTube-cron)."
+                : "Tallene er manuelle indtil pipeline-data (n8n/YouTube-cron) lander i tabellerne."}
             </div>
 
             <div className="sc-econ-pills">
