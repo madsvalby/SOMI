@@ -625,7 +625,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
           min-height:100vh; background:var(--ink); color:var(--bone); font-family:var(--sans); -webkit-font-smoothing:antialiased;
         }
-        .sc-shell { max-width:1240px; margin:0 auto; padding:0 32px 90px; }
+        .sc-shell { max-width:1600px; margin:0 auto; padding:0 40px 90px; }
         .sc-root *::selection { background:rgba(201,161,78,0.3); }
 
         .sc-mast { padding:36px 0 0; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
@@ -635,7 +635,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-mast-meta b { color:var(--bone-dim); font-weight:500; }
         .sc-save { display:inline-flex; align-items:center; gap:6px; color:var(--green); }
 
-        .sc-nav { display:flex; gap:4px; margin-top:24px; border-bottom:1px solid var(--line); overflow-x:auto; }
+        .sc-nav { display:flex; flex-wrap:wrap; gap:4px; margin-top:24px; border-bottom:1px solid var(--line); }
         .sc-tab { font-family:var(--mono); font-size:12px; letter-spacing:0.06em; padding:11px 13px 13px; background:none; border:none;
           cursor:pointer; color:var(--bone-faint); display:flex; align-items:center; gap:7px; border-bottom:2px solid transparent; white-space:nowrap; }
         .sc-tab:hover { color:var(--bone-dim); }
