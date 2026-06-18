@@ -625,7 +625,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
           min-height:100vh; background:var(--ink); color:var(--bone); font-family:var(--sans); -webkit-font-smoothing:antialiased;
         }
-        .sc-shell { max-width:920px; margin:0 auto; padding:0 20px 90px; }
+        .sc-shell { max-width:1240px; margin:0 auto; padding:0 32px 90px; }
         .sc-root *::selection { background:rgba(201,161,78,0.3); }
 
         .sc-mast { padding:36px 0 0; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
