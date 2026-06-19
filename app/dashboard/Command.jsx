@@ -5,7 +5,8 @@ import {
   AlertTriangle, Radio, Rocket, LayoutGrid, ListChecks, Flag, Server, Cpu,
   Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap, CircleDot, Lock,
   Wand2, Download, Loader2, TrendingUp, Coins, Activity,
-  Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge
+  Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge,
+  Megaphone, MessageSquare, Pin, Facebook
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
@@ -277,16 +278,49 @@ const PIPE_META = {
 };
 const PIPE_ORDER = ["idle", "producing", "published", "error"];
 
-const NAV = [
-  { id: "overblik", label: "Overblik", Icon: LayoutGrid },
-  { id: "system", label: "System", Icon: Server },
-  { id: "byggeplan", label: "Byggeplan", Icon: ListChecks },
-  { id: "roadmap", label: "Roadmap", Icon: Milestone },
-  { id: "kreditter", label: "Kreditter", Icon: Wallet },
-  { id: "okonomi", label: "Økonomi", Icon: Coins },
-  { id: "launchpad", label: "Launchpad", Icon: Rocket },
-  { id: "kanaler", label: "Kanaler", Icon: Radio },
-  { id: "ko", label: "Idé-kø", Icon: Flag },
+// Faner grupperet i klynger (vist med skillelinjer i nav'en). Den flade NAV
+// nedenfor afledes heraf, så tastatur-genveje (1–n) og index-logik er uændret.
+const NAV_GROUPS = [
+  { tabs: [{ id: "overblik", label: "Overblik", Icon: LayoutGrid }] },
+  { label: "Drift", tabs: [
+    { id: "kanaler", label: "Kanaler", Icon: Radio },
+    { id: "ko", label: "Idé-kø", Icon: Flag },
+    { id: "opslag", label: "Opslag", Icon: Megaphone },
+    { id: "system", label: "System", Icon: Server },
+  ] },
+  { label: "Økonomi", tabs: [
+    { id: "kreditter", label: "Kreditter", Icon: Wallet },
+    { id: "okonomi", label: "Økonomi", Icon: Coins },
+  ] },
+  { label: "Plan", tabs: [
+    { id: "byggeplan", label: "Byggeplan", Icon: ListChecks },
+    { id: "roadmap", label: "Roadmap", Icon: Milestone },
+    { id: "launchpad", label: "Launchpad", Icon: Rocket },
+  ] },
+];
+const NAV = NAV_GROUPS.flatMap((g) => g.tabs);
+
+// ── Opslag/content-strategi (Drift → Opslag) ──
+// Ny kadence når video-tempoet skrues ned: hold kanalen aktiv mellem videoer.
+const POST_CADENCE = [
+  { Icon: Rocket,  k: "Long-form", v: "hver 2.–3. dag", note: "15-min dokumentar — kvalitet > kvantitet" },
+  { Icon: Zap,     k: "Short-form", v: "1× dagligt", note: "3 shorts pr. long-form, drypvis udgivet" },
+  { Icon: Megaphone, k: "Community / FB", v: "udfyld huller", note: "Hold publikum varmt på ikke-video-dage" },
+];
+// Per-opslag checkliste. mode=auto ⇒ kan køres i n8n · manual ⇒ ingen API, human-in-the-loop.
+const POST_CHECKLIST = [
+  { Icon: MessageSquare, t: "Auto-top-kommentar", mode: "auto",
+    d: "Pipelinen poster en hook/spørgsmål som top-kommentar på egen video for at starte tråden.",
+    api: "YouTube commentThreads.insert · scope youtube.force-ssl (50 quota/kald)" },
+  { Icon: Pin, t: "Pin kommentaren", mode: "manual",
+    d: "Pin top-kommentaren så den ligger øverst. Ingen API — 5 sek. i Studio.",
+    api: "Manuelt i YouTube Studio" },
+  { Icon: Megaphone, t: "YouTube community-post", mode: "manual",
+    d: "Tekst/billede/poll i community-fanen mellem videoer. Ingen officiel API.",
+    api: "Manuelt — n8n kan sende dig en påmindelse med færdig tekst" },
+  { Icon: Facebook, t: "Facebook side-opslag", mode: "auto",
+    d: "Tekst- eller foto-opslag på siden (klip, citat, bag-om) for at holde aktivitet.",
+    api: "Graph API /{page-id}/feed + /photos · pages_manage_posts" },
 ];
 
 const STATUS_META = {
@@ -644,6 +678,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           cursor:pointer; color:var(--bone-faint); display:flex; align-items:center; gap:7px; border-bottom:2px solid transparent; white-space:nowrap; }
         .sc-tab:hover { color:var(--bone-dim); }
         .sc-tab.active { color:var(--bone); border-bottom-color:var(--gold); }
+        .sc-nav-sep { align-self:center; width:1px; height:15px; background:var(--line); margin:0 8px 4px; flex-shrink:0; }
 
         .sc-section-label { font-family:var(--mono); font-size:10px; letter-spacing:0.26em; color:var(--gold); text-transform:uppercase;
           display:flex; align-items:center; gap:8px; margin:30px 0 14px; }
@@ -948,19 +983,24 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           ))}
         </div>
 
-        {/* Nav */}
+        {/* Nav — grupperet i klynger med skillelinjer */}
         <nav className="sc-nav" aria-label="Sektioner">
-          {NAV.map((t) => {
-            const Ic = t.Icon;
-            return (
-              <button key={t.id} className={`sc-tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-                <Ic size={13} strokeWidth={2} />{t.label}
-                {t.id === "kreditter" && alerts.length > 0 && (
-                  <span style={{ color: "var(--rust)", fontSize: 13, lineHeight: 1 }}>•</span>
-                )}
-              </button>
-            );
-          })}
+          {NAV_GROUPS.map((g, gi) => (
+            <React.Fragment key={gi}>
+              {gi > 0 && <span className="sc-nav-sep" aria-hidden="true" title={g.label} />}
+              {g.tabs.map((t) => {
+                const Ic = t.Icon;
+                return (
+                  <button key={t.id} className={`sc-tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+                    <Ic size={13} strokeWidth={2} />{t.label}
+                    {t.id === "kreditter" && alerts.length > 0 && (
+                      <span style={{ color: "var(--rust)", fontSize: 13, lineHeight: 1 }}>•</span>
+                    )}
+                  </button>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </nav>
 
         {/* ───────── OVERBLIK ───────── */}
@@ -1553,6 +1593,55 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         )}
 
         {/* ───────── IDÉ-KØ ───────── */}
+        {/* ───────── OPSLAG ───────── */}
+        {tab === "opslag" && (
+          <>
+            <div className="sc-lede" style={{ marginTop: 28 }}>
+              Når video-tempoet skrues ned, holder vi kanalen aktiv med community- og FB-opslag + kommentar-spil.
+              Her er kadencen og hvad pipelinen kan automatisere kontra hvad der kræver et manuelt klik.
+            </div>
+
+            <div className="sc-section-label"><Activity size={11} strokeWidth={2.4} /> Kadence</div>
+            <div className="sc-kpis">
+              {POST_CADENCE.map((c) => {
+                const Ic = c.Icon;
+                return (
+                  <div className="sc-kpi" key={c.k}>
+                    <div className="sc-kpi-num" style={{ fontSize: 17, display: "flex", alignItems: "center", gap: 8 }}><Ic size={15} /> {c.v}</div>
+                    <div className="sc-kpi-lbl">{c.k}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--bone-faint)", marginTop: 7, lineHeight: 1.45 }}>{c.note}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="sc-section-label"><ListChecks size={11} strokeWidth={2.4} /> Per-opslag checkliste</div>
+            {POST_CHECKLIST.map((p) => {
+              const Ic = p.Icon;
+              return (
+                <div className="sc-watch" key={p.t} style={{ alignItems: "flex-start" }}>
+                  <Ic size={17} className="sc-watch-ic" style={{ color: p.mode === "auto" ? "var(--green)" : "var(--bone-faint)" }} />
+                  <div className="sc-watch-body">
+                    <div className="sc-watch-t" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      {p.t}
+                      <span className={`sc-pill static ${p.mode === "auto" ? "ok" : "queued"}`}>{p.mode === "auto" ? "Auto" : "Manuelt"}</span>
+                    </div>
+                    <div className="sc-watch-d">{p.d}</div>
+                    <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--bone-faint)", marginTop: 6, letterSpacing: "0.02em" }}>{p.api}</div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="sc-section-label"><GitBranch size={11} strokeWidth={2.4} /> Næste increment (n8n)</div>
+            <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)", display: "block", lineHeight: 1.6 }}>
+              <b style={{ color: "var(--green)" }}>Kan automatiseres:</b> FB side-opslag + YT auto-top-kommentar bygges som to n8n-workflows kaldt fra MASTER efter upload —
+              venter på dine FB Page-tokens (App Review/Business Verification) og at Google-scopet udvides til <code>youtube.force-ssl</code>.<br />
+              <b style={{ color: "var(--bone-faint)" }}>Forbliver manuelt:</b> YouTube community-post og pin af kommentar (ingen API) — pipelinen kan sende dig en påmindelse med færdig tekst.
+            </div>
+          </>
+        )}
+
         {tab === "ko" && (
           <>
             <div className="sc-lede" style={{ marginTop: 28 }}>
