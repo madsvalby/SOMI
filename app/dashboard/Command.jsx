@@ -107,6 +107,7 @@ const SEED_DONE = [
   "f0s1","f0s2","f0s3","f0s4","f0s5","f0s6","f0s7","f0s8","f0s9",
   "f1s1","f1s2","f1s3","f1s4","f1s5","f1s6","f1s7","f1s8","f1s9","f1s10",
   "f2s1","f2s2","f2s3",
+  "f3s1","f3s2", // Supabase-projekt+schema ✓ · Port til Next.js (live på Vercel) ✓
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
