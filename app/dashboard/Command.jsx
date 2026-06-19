@@ -108,6 +108,7 @@ const SEED_DONE = [
   "f1s1","f1s2","f1s3","f1s4","f1s5","f1s6","f1s7","f1s8","f1s9","f1s10",
   "f2s1","f2s2","f2s3",
   "f3s1","f3s2", // Supabase-projekt+schema ✓ · Port til Next.js (live på Vercel) ✓
+  "f3s3",        // Cron: YouTube Analytics dagligt ✓ (OAuth+scopes verificeret end-to-end)
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
