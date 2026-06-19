@@ -655,7 +655,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
   return (
     <div className="sc-root" style={{ "--gold": themeAccent, "--gold-bright": themeBright }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
         .sc-root {
           --ink:#100E0B; --panel:#18150F; --panel2:#1F1B13; --line:#2E2920; --line-soft:#251F17;
@@ -957,7 +957,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
         @media (prefers-reduced-motion: reduce) { .sc-root * { transition:none !important; } }
         @media (max-width:560px) { .sc-phase-meta .week { display:none; } .sc-guide { margin-left:20px; } }
-      `}</style>
+      ` }} />
 
       <div className="sc-shell">
         {/* Masthead */}
