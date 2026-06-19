@@ -342,6 +342,8 @@ export default function SomiCommand() {
   const [newEarn, setNewEarn] = useState({ source: "youtube", month: new Date().toISOString().slice(0, 7), usd: "", channelId: "ch1" });
   const [econChan, setEconChan] = useState("all");
   const [pipelineAuto, setPipelineAuto] = useState(false);
+  const [liveVideos, setLiveVideos] = useState([]); // produktions-kø fra videos-tabellen (read-only)
+  const [qcLog, setQcLog] = useState([]);           // seneste QC-domme fra qc_log (read-only)
 
   // ── Load ──
   useEffect(() => {
@@ -377,6 +379,8 @@ export default function SomiCommand() {
           const pj = await pres.json();
           if (Array.isArray(pj.costs) && pj.costs.length) setCosts(pj.costs);
           if (Array.isArray(pj.earnings) && pj.earnings.length) setEarnings(pj.earnings);
+          if (Array.isArray(pj.queue)) setLiveVideos(pj.queue);
+          if (Array.isArray(pj.qc)) setQcLog(pj.qc);
           setPipelineAuto(!!(pj.counts && (pj.counts.costlog || pj.counts.earnings)));
         }
       } catch (e) { /* pipeline ikke tilgængelig — behold manuel/KV */ }
@@ -1153,6 +1157,30 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                   <p className="sc-cred-burn" style={{ marginTop: 6 }}>⛽ Kalibreret i test: rent Enron-script → pass 8.2 · "heist/stole"-formuleret → reject 3.8.</p>
                 </div>
 
+                {qcLog.length > 0 && (
+                  <>
+                    <div className="sc-section-label">Seneste QC-domme (qc_log)</div>
+                    <div className="sc-gate">
+                      {qcLog.map((r) => {
+                        const cls = r.verdict === "pass" ? "var(--green)" : r.verdict === "reject" ? "var(--rust)" : r.verdict === "revise" ? "var(--amber)" : "var(--bone-dim)";
+                        return (
+                          <div className="sc-rubric" key={r.id} style={{ alignItems: "baseline" }}>
+                            <span className="r-k" style={{ color: cls, minWidth: 70, textTransform: "uppercase" }}>{r.verdict || "—"}</span>
+                            <span className="r-d">
+                              <b>{r.case}</b>
+                              {(r.overall != null || r.compliance != null) && (
+                                <> · score {r.overall ?? "–"} · compliance {r.compliance ?? "–"}</>
+                              )}
+                              {r.flags && r.flags.length > 0 && <> · {r.flags.length} flag</>}
+                              {r.ts && <span style={{ color: "var(--bone-dim)" }}> · {new Date(r.ts).toLocaleDateString("da-DK", { day: "2-digit", month: "short" })}</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
                 <div className="sc-section-label">Klar til enforce-flip?</div>
                 <div className="sc-gate">
                   {qcrDone === QC_READY.length && (
@@ -1596,6 +1624,29 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                       ))}
                     </div>
                   </div>
+                )}
+
+                {liveVideos.filter((v) => v.channelId === channel.id).length > 0 && (
+                  <>
+                    <div className="sc-section-label" style={{ marginTop: 22 }}><Radio size={11} strokeWidth={2.4} /> Live produktion (n8n)</div>
+                    <div className="sc-lede" style={{ marginTop: 0, marginBottom: 8, fontSize: 12 }}>
+                      Direkte fra videos-tabellen — kun læsning. Statusserne styres af pipelinen.
+                    </div>
+                    <div className="sc-phase">
+                      <div className="sc-steps" style={{ borderTop: "none" }}>
+                        {liveVideos.filter((v) => v.channelId === channel.id).map((v) => (
+                          <div key={v.id} className="sc-step">
+                            <div className="sc-step-row">
+                              <div className="sc-step-body">
+                                <div className="sc-step-title">{v.case}</div>
+                              </div>
+                              <span className={"sc-pill static " + ({ producerer: "next", til_godkendelse: "queued", needs_review: "kritisk", uploadet_privat: "ok", published: "ok" }[v.status] || "")}>{v.label}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}
