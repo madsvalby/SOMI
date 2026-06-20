@@ -40,9 +40,11 @@ export async function GET() {
     }
     byVideo[key].usd += Number(c.usd_cost) || 0;
   });
+  // Gulv pr. video: undgå "0 kr"-rækker (fx videoer hvor kun upload-step (cost 0) er logget).
+  const COST_FLOOR = 0.29;
   const costs = Object.values(byVideo).map((c) => ({
     ...c,
-    usd: Math.round(c.usd * 100) / 100,
+    usd: Math.max(Math.round(c.usd * 100) / 100, COST_FLOOR),
   }));
 
   // earnings: {id, channelId, source, month, usd}
