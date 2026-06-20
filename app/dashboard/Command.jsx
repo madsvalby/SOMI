@@ -114,6 +114,7 @@ const SEED_DONE = [
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
+const nfDK = (n) => new Intl.NumberFormat("da-DK").format(Math.round(Number(n) || 0));
 const N8N_BASE = "https://madsvalby.app.n8n.cloud";
 const SEED_CHANNELS = [
   {
@@ -385,6 +386,7 @@ export default function SomiCommand() {
   const [pipelineAuto, setPipelineAuto] = useState(false);
   const [liveVideos, setLiveVideos] = useState([]); // produktions-kø fra videos-tabellen (read-only)
   const [qcLog, setQcLog] = useState([]);           // seneste QC-domme fra qc_log (read-only)
+  const [analytics, setAnalytics] = useState(null); // winner-loop metrics (stats_daily) — KPI-stribe
 
   // ── Load ──
   useEffect(() => {
@@ -425,6 +427,12 @@ export default function SomiCommand() {
           setPipelineAuto(!!(pj.counts && (pj.counts.costlog || pj.counts.earnings)));
         }
       } catch (e) { /* pipeline ikke tilgængelig — behold manuel/KV */ }
+
+      // KPI-stribe: live nøgletal fra stats_daily (winner-loop). Tom indtil kanalen får views.
+      try {
+        const ares = await fetch("/api/analytics");
+        if (ares.ok) setAnalytics(await ares.json());
+      } catch (e) { /* analytics ikke tilgængelig — KPI falder tilbage til manuel */ }
 
       setLoaded(true);
     })();
@@ -1039,16 +1047,30 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               <div className="sc-kpi"><div className="sc-kpi-num" style={{ color: alerts.length ? "var(--rust)" : "var(--green)" }}>{alerts.length}</div><div className="sc-kpi-lbl">Konti at fylde</div></div>
             </div>
 
-            <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · manuelt indtil Analytics er koblet på</div>
-            <div className="sc-kpis">
-              {[{ k: "videos", l: "Videoer udgivet" }, { k: "views", l: "Visninger i alt" }, { k: "subs", l: "Abonnenter" }].map((m) => (
-                <div className="sc-kpi" key={m.k}>
-                  <input className="sc-kpi-input" inputMode="numeric" placeholder="—" value={kpis[m.k]}
-                    onChange={(e) => patchKpi({ [m.k]: e.target.value })} aria-label={m.l} />
-                  <div className="sc-kpi-lbl">{m.l}</div>
+            {analytics?.hasData ? (
+              <>
+                <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · live fra YouTube Analytics</div>
+                <div className="sc-kpis">
+                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.totalViews)}</div><div className="sc-kpi-lbl">Visninger i alt</div></div>
+                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK((analytics.metrics.totalWatchMin || 0) / 60)}</div><div className="sc-kpi-lbl">Watch-timer</div></div>
+                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.totalSubs)}</div><div className="sc-kpi-lbl">Nye abonnenter</div></div>
+                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.videosWithViews)}</div><div className="sc-kpi-lbl">Videoer med views</div></div>
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <>
+                <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · manuelt indtil Analytics har data</div>
+                <div className="sc-kpis">
+                  {[{ k: "videos", l: "Videoer udgivet" }, { k: "views", l: "Visninger i alt" }, { k: "subs", l: "Abonnenter" }].map((m) => (
+                    <div className="sc-kpi" key={m.k}>
+                      <input className="sc-kpi-input" inputMode="numeric" placeholder="—" value={kpis[m.k]}
+                        onChange={(e) => patchKpi({ [m.k]: e.target.value })} aria-label={m.l} />
+                      <div className="sc-kpi-lbl">{m.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             <div className="sc-section-label"><Coins size={11} strokeWidth={2.4} /> Økonomi · samlet på tværs af kanaler</div>
             <div className="sc-kpis">
