@@ -22,7 +22,7 @@ export async function GET(request) {
     }
   };
 
-  const jobs = [run("/api/cron/competitors")];
+  const jobs = [run("/api/cron/competitors"), run("/api/cron/reports")];
   if (new Date().getUTCDay() === 1) jobs.push(run("/api/cron/ideas")); // mandag
 
   const results = await Promise.all(jobs);
