@@ -1702,8 +1702,6 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               Roadmap-overblik pr. kanal. Den <b>live</b> produktions-kø styres i n8n's ideas-tabel — det her er fugleperspektivet.
             </div>
 
-            <IdeaQueueBoard />
-
             <div className="sc-chan-row" style={{ marginBottom: 16 }}>
               {channels.map((c) => (
                 <button key={c.id} className={`sc-pill static ${activeChan === c.id ? "ok" : "queued"}`}
@@ -1746,30 +1744,51 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                   )}
                 </div>
 
-                {channel.queue.length === 0 ? (
-                  <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
-                    Ingen sager endnu. Tilføj den første ovenfor.
-                  </div>
-                ) : (
-                  <div className="sc-phase" style={{ marginTop: 4 }}>
-                    <div className="sc-steps" style={{ borderTop: "none" }}>
-                      {channel.queue.map((q, i) => (
-                        <div key={q.id} className="sc-step">
-                          <div className="sc-step-row">
-                            <span className="sc-sagnr" style={{ minWidth: 32, marginTop: 2 }}>{String(i + 1).padStart(2, "0")}</span>
-                            <div className="sc-step-body">
-                              <div className="sc-step-title">{q.name}</div>
-                            </div>
-                            <button className={`sc-pill ${q.status}`} onClick={() => cycleCase(channel.id, q.id)} title="Klik for at skifte status">
-                              {CASE_STATUS[q.status]}
-                            </button>
-                            <button className="sc-guide-btn" onClick={() => removeIdea(channel.id, q.id)} aria-label="Fjern sag"><X size={15} /></button>
-                          </div>
+                <IdeaQueueBoard />
+
+                {(() => {
+                  const queued = channel.queue.filter((q) => q.status !== "live");
+                  const liveItems = channel.queue.filter((q) => q.status === "live");
+                  const renderRow = (q, i) => (
+                    <div key={q.id} className="sc-step">
+                      <div className="sc-step-row">
+                        <span className="sc-sagnr" style={{ minWidth: 32, marginTop: 2 }}>{String(i + 1).padStart(2, "0")}</span>
+                        <div className="sc-step-body">
+                          <div className="sc-step-title">{q.name}</div>
                         </div>
-                      ))}
+                        <button className={`sc-pill ${q.status}`} onClick={() => cycleCase(channel.id, q.id)} title="Klik for at skifte status">
+                          {CASE_STATUS[q.status]}
+                        </button>
+                        <button className="sc-guide-btn" onClick={() => removeIdea(channel.id, q.id)} aria-label="Fjern sag"><X size={15} /></button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                  return (
+                    <>
+                      <div className="sc-section-label" style={{ marginTop: 18 }}><Flag size={11} strokeWidth={2.4} /> Kø / planlagt</div>
+                      {queued.length === 0 ? (
+                        <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
+                          Ingen sager i kø. Tilføj en ovenfor — klik en sags status for at flytte den til Live.
+                        </div>
+                      ) : (
+                        <div className="sc-phase" style={{ marginTop: 4 }}>
+                          <div className="sc-steps" style={{ borderTop: "none" }}>{queued.map(renderRow)}</div>
+                        </div>
+                      )}
+
+                      <div className="sc-section-label" style={{ marginTop: 20 }}><Radio size={11} strokeWidth={2.4} /> Live / udgivet</div>
+                      {liveItems.length === 0 ? (
+                        <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
+                          Ingen live endnu. Sæt en sag i kø'en til <b>Live</b> (klik dens status), så rykker den herned.
+                        </div>
+                      ) : (
+                        <div className="sc-phase" style={{ marginTop: 4 }}>
+                          <div className="sc-steps" style={{ borderTop: "none" }}>{liveItems.map(renderRow)}</div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {liveVideos.filter((v) => v.channelId === channel.id).length > 0 && (
                   <>

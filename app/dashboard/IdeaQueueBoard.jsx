@@ -89,7 +89,7 @@ export default function IdeaQueueBoard() {
 
       <div className="sc-section-label" style={{ marginTop: 22, justifyContent: "space-between" }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <ListOrdered size={11} strokeWidth={2.4} /> Kø / næste — træk for at ændre produktionsrækkefølge
+          <ListOrdered size={11} strokeWidth={2.4} /> Produktions-kø (n8n) — træk for at ændre rækkefølge
         </span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           {saving && <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--bone-faint)", display: "inline-flex", gap: 4, alignItems: "center" }}><Loader2 size={11} className="sc-spin" /> Gemmer</span>}
