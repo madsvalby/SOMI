@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Activity, Trophy, Scissors, Eye, AlertTriangle, Sparkles, Loader2, TrendingDown, RefreshCw,
+  Check, Inbox,
 } from "lucide-react";
+import { buildWinnerPrompt, parseIdeasFromText, anthropicText, normTitle } from "@/lib/ideas";
 
 const fmt = (n) => new Intl.NumberFormat("da-DK").format(Math.round(n || 0));
 
@@ -13,6 +15,9 @@ export default function InsightsPanel() {
   const [aiBusy, setAiBusy] = useState(false);
   const [aiIdeas, setAiIdeas] = useState([]);
   const [aiErr, setAiErr] = useState("");
+  const [saved, setSaved] = useState({});       // normTitle -> true når gemt i kø
+  const [savingAll, setSavingAll] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
 
   const load = async () => {
     setLoading(true); setErr("");
@@ -28,31 +33,49 @@ export default function InsightsPanel() {
 
   const suggestFromWinners = async () => {
     if (!data || !data.winners || !data.winners.length) return;
-    setAiBusy(true); setAiErr(""); setAiIdeas([]);
+    setAiBusy(true); setAiErr(""); setAiIdeas([]); setSaved({}); setSaveMsg("");
     try {
-      const titles = data.winners.map((w) => w.title).join(", ");
-      const themes = (data.winnerPattern?.themes || []).map((t) => t.word).join(", ");
-      const prompt = `You optimize a YouTube documentary channel about financial crime and corporate collapse.
-These are the channel's BEST performing videos by views: ${titles}.
-Recurring themes in the winners: ${themes || "n/a"}.
-Suggest 5 NEW, real, well-documented cases that match what is already winning (same energy, audience and themes) and would make gripping 15-minute documentaries. For each give a short title and a one-line hook (max 12 words) plus a 1-line "why" tying it to the winning pattern. Return ONLY a JSON array, no markdown, shaped exactly like: [{"name":"...","hook":"...","why":"..."}]`;
+      const prompt = buildWinnerPrompt({
+        titles: data.winners.map((w) => w.title),
+        themes: (data.winnerPattern?.themes || []).map((t) => t.word),
+      });
       const res = await fetch("/api/anthropic", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
       const d = await res.json();
-      let text = (d.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const s = text.indexOf("["), e = text.lastIndexOf("]");
-      if (s >= 0 && e > s) text = text.slice(s, e + 1);
-      const arr = JSON.parse(text);
-      const clean = Array.isArray(arr) ? arr.filter((x) => x && x.name).slice(0, 6) : [];
+      const clean = parseIdeasFromText(anthropicText(d)).slice(0, 6);
       setAiIdeas(clean);
       if (!clean.length) setAiErr("Ingen forslag kom retur. Prøv igen.");
     } catch (e) {
       setAiErr("Kunne ikke hente forslag lige nu.");
     } finally { setAiBusy(false); }
   };
+
+  // Skriv forslag direkte i ideas-tabellen (status='proposed') — lukker loop'en.
+  const saveIdeas = async (ideas) => {
+    const fresh = ideas.filter((x) => x && x.name && !saved[normTitle(x.name)]);
+    if (!fresh.length) return;
+    const res = await fetch("/api/ideas", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ideas: fresh, source: "winner-loop" }),
+    });
+    if (!res.ok) { setSaveMsg("Kunne ikke gemme i køen lige nu."); return; }
+    const d = await res.json();
+    setSaved((prev) => {
+      const next = { ...prev };
+      fresh.forEach((x) => { next[normTitle(x.name)] = true; });
+      return next;
+    });
+    setSaveMsg(`${d.inserted || 0} gemt i idé-køen${d.skipped ? ` · ${d.skipped} fandtes allerede` : ""}.`);
+  };
+
+  const saveOne = async (idea) => { await saveIdeas([idea]); };
+  const saveAll = async () => {
+    setSavingAll(true); setSaveMsg("");
+    try { await saveIdeas(aiIdeas); } finally { setSavingAll(false); }
+  };
+  const unsavedCount = aiIdeas.filter((x) => x && x.name && !saved[normTitle(x.name)]).length;
 
   const m = data?.metrics;
 
@@ -94,6 +117,15 @@ Suggest 5 NEW, real, well-documented cases that match what is already winning (s
           background:var(--gold); color:var(--ink); border:none; border-radius:8px; padding:9px 14px; cursor:pointer; font-weight:600; }
         .ins-btn:hover { background:var(--gold-bright); }
         .ins-btn:disabled { opacity:0.6; cursor:default; }
+        .ins-btn.ghost { background:transparent; color:var(--gold); border:1px solid rgba(201,161,78,0.5); }
+        .ins-btn.ghost:hover { background:rgba(201,161,78,0.08); }
+        .ins-idea-h { display:flex; align-items:flex-start; gap:10px; }
+        .ins-idea-h .nm { flex:1; min-width:0; }
+        .ins-save { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:10.5px;
+          letter-spacing:0.04em; border-radius:7px; padding:5px 9px; cursor:pointer; font-weight:600;
+          background:var(--gold); color:var(--ink); border:none; }
+        .ins-save:hover { background:var(--gold-bright); }
+        .ins-save.done { background:rgba(62,157,94,0.12); color:var(--green); border:1px solid rgba(62,157,94,0.4); cursor:default; }
         .ins-muted { font-family:var(--mono); font-size:11px; color:var(--bone-faint); }
         .sc-spin { animation:sc-rot 0.8s linear infinite; }
       ` }} />
@@ -177,20 +209,43 @@ Suggest 5 NEW, real, well-documented cases that match what is already winning (s
               <div className="ins-ai">
                 <div className="ins-card-h"><Sparkles size={16} /> Nye idéer fra vinderne</div>
                 <p className="ins-note" style={{ margin: "6px 0 12px", maxWidth: "60ch" }}>
-                  Lad AI'en foreslå nye sager der matcher det der allerede vinder (samme temaer og energi).
+                  Lad AI'en foreslå nye sager der matcher det der allerede vinder — og gem dem
+                  direkte i idé-køen (lander som <b>forslag</b> i ideas-tabellen til din godkendelse).
                 </p>
-                <button className="ins-btn" onClick={suggestFromWinners} disabled={aiBusy}>
-                  {aiBusy ? <Loader2 size={13} className="sc-spin" /> : <Sparkles size={13} />}
-                  {aiBusy ? "Tænker…" : "Foreslå idéer"}
-                </button>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button className="ins-btn" onClick={suggestFromWinners} disabled={aiBusy}>
+                    {aiBusy ? <Loader2 size={13} className="sc-spin" /> : <Sparkles size={13} />}
+                    {aiBusy ? "Tænker…" : "Foreslå idéer"}
+                  </button>
+                  {aiIdeas.length > 0 && (
+                    <button className="ins-btn ghost" onClick={saveAll} disabled={savingAll || unsavedCount === 0}>
+                      {savingAll ? <Loader2 size={13} className="sc-spin" /> : <Inbox size={13} />}
+                      {unsavedCount === 0 ? "Alle gemt" : `Gem alle i kø (${unsavedCount})`}
+                    </button>
+                  )}
+                </div>
                 {aiErr && <p className="ins-note" style={{ color: "var(--rust)", marginTop: 10 }}>{aiErr}</p>}
-                {aiIdeas.map((idea, i) => (
-                  <div className="ins-idea" key={i}>
-                    <div className="nm">{idea.name}</div>
-                    {idea.hook && <div className="hk">{idea.hook}</div>}
-                    {idea.why && <div className="wy">▸ {idea.why}</div>}
-                  </div>
-                ))}
+                {saveMsg && <p className="ins-note" style={{ color: "var(--green)", marginTop: 10 }}>{saveMsg}</p>}
+                {aiIdeas.map((idea, i) => {
+                  const isSaved = !!saved[normTitle(idea.name)];
+                  return (
+                    <div className="ins-idea" key={i}>
+                      <div className="ins-idea-h">
+                        <div className="nm">{idea.name}</div>
+                        <button
+                          className={"ins-save" + (isSaved ? " done" : "")}
+                          onClick={() => !isSaved && saveOne(idea)}
+                          disabled={isSaved}
+                          title={isSaved ? "Gemt i idé-køen" : "Gem i idé-køen"}
+                        >
+                          {isSaved ? <><Check size={12} /> Gemt</> : <><Inbox size={12} /> Gem i kø</>}
+                        </button>
+                      </div>
+                      {idea.hook && <div className="hk">{idea.hook}</div>}
+                      {idea.why && <div className="wy">▸ {idea.why}</div>}
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}

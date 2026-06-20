@@ -9,6 +9,7 @@ import {
   Megaphone, MessageSquare, Pin, Facebook, Bot
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
+import ProposedIdeasPanel from "./ProposedIdeasPanel";
 
 // ─────────────────────────────────────────────────────────────
 // SOMI COMMAND · Kommandocentral
@@ -1764,6 +1765,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                 )}
               </>
             )}
+
+            <ProposedIdeasPanel />
           </>
         )}
 
