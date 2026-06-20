@@ -3,8 +3,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
-  background: #0d0d0f;
-  color: #e9e3d6;
+  background: #F6F7FB;
+  color: #1F2530;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }

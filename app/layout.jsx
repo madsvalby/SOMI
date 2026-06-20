@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "SOMI Command",
-  description: "Kommandocentral · Paper Empires",
+  title: "Paper Empires Command Center",
+  description: "AI-powered content operations · Paper Empires",
 };
 
 export default function RootLayout({ children }) {

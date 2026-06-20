@@ -70,8 +70,13 @@ Next.js 14.2.x (App Router, **JavaScript — ikke TypeScript**), React 18, `@sup
 - **Mads indsætter selv alle nøgler** — bed ham gøre det, indsæt dem ikke for ham, og bed ham aldrig
   om at lime dem ind i chatten.
 - Kør altid `npm run build` lokalt før deploy.
-- Bevar det eksisterende noir/guld-design (Fraunces / Inter / JetBrains Mono, accent `#C9A14E`).
-  Lav ikke om på `Command.jsx`'s logik uden grund — det er en porteret, fungerende komponent.
+- **Design (opdateret jun. 2026): lyst/guld hybrid-tema** ("Paper Empires Command Center") — lys baggrund
+  (`--bg:#F6F7FB`), hvide kort med bløde skygger, guld-accent `#C9A14E`. Fraunces / Inter / JetBrains Mono.
+  Temaet styres af CSS-variabler i `Command.jsx`'s `<style>`-blok (`--bg/--panel/--field/--ink/--num/--bone*`).
+  Tidligere noir-tema er afløst. Lav ikke om på `Command.jsx`'s *logik* uden grund — kun udseende/nye sektioner.
+- **Agenter-modul:** `app/dashboard/AgentsTab.jsx` + `lib/agents.js` (roster mappet til n8n-workflows) +
+  `lib/agentSkills.js` (`MOCK_SKILLS` + `runSkill()` n8n-webhook-stub) + `lib/dashboardState.js` (delte KV-helpers).
+  Agent-status er pt. DEMO/mock indtil n8n-executions wires ind. Skills-state gemmes i KV `somi_agent_skills_v1`.
 
 ## Kommando-cheatsheet
 ```bash

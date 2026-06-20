@@ -6,8 +6,9 @@ import {
   Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap, CircleDot, Lock,
   Wand2, Download, Loader2, TrendingUp, Coins, Activity,
   Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge,
-  Megaphone, MessageSquare, Pin, Facebook
+  Megaphone, MessageSquare, Pin, Facebook, Bot
 } from "lucide-react";
+import AgentsTab from "./AgentsTab";
 
 // ─────────────────────────────────────────────────────────────
 // SOMI COMMAND · Kommandocentral
@@ -283,7 +284,10 @@ const PIPE_ORDER = ["idle", "producing", "published", "error"];
 // Faner grupperet i klynger (vist med skillelinjer i nav'en). Den flade NAV
 // nedenfor afledes heraf, så tastatur-genveje (1–n) og index-logik er uændret.
 const NAV_GROUPS = [
-  { tabs: [{ id: "overblik", label: "Overblik", Icon: LayoutGrid }] },
+  { tabs: [
+    { id: "overblik", label: "Overblik", Icon: LayoutGrid },
+    { id: "agenter", label: "Agenter", Icon: Bot },
+  ] },
   { label: "Drift", tabs: [
     { id: "kanaler", label: "Kanaler", Icon: Radio },
     { id: "ko", label: "Idé-kø", Icon: Flag },
@@ -659,11 +663,14 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
         .sc-root {
-          --ink:#100E0B; --panel:#18150F; --panel2:#1F1B13; --line:#2E2920; --line-soft:#251F17;
-          --bone:#EAE3D3; --bone-dim:#9C927C; --bone-faint:#6E6552;
-          --gold:#C9A14E; --gold-bright:#E5C97E; --green:#6CAE7E; --rust:#B0563B; --amber:#D29A4A;
+          /* Lyst/guld hybrid-tema. --ink = mørk (tekst + tekst-på-guld). --bg/--field = lyse flader. */
+          --bg:#F6F7FB; --panel:#FFFFFF; --panel2:#F1F3F8; --field:#F4F5F8;
+          --line:rgba(15,23,42,0.10); --line-soft:rgba(15,23,42,0.06);
+          --ink:#141821; --num:#14181F;
+          --bone:#1F2530; --bone-dim:#5B6473; --bone-faint:#97A0AF;
+          --gold:#C9A14E; --gold-bright:#D7B26A; --green:#3E9D5E; --rust:#B0492C; --amber:#B7822B;
           --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
-          min-height:100vh; background:var(--ink); color:var(--bone); font-family:var(--sans); -webkit-font-smoothing:antialiased;
+          min-height:100vh; background:var(--bg); color:var(--bone); font-family:var(--sans); -webkit-font-smoothing:antialiased;
         }
         .sc-shell { max-width:1600px; margin:0 auto; padding:0 40px 90px; }
         .sc-root *::selection { background:rgba(201,161,78,0.3); }
@@ -690,7 +697,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         /* KPI strip */
         .sc-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-top:24px; }
         .sc-kpi { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
-        .sc-kpi-num { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--gold-bright); line-height:1; }
+        .sc-kpi-num { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--num); line-height:1; }
         .sc-kpi-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.13em; color:var(--bone-dim); text-transform:uppercase; margin-top:8px; }
 
         /* Alerts */
@@ -743,7 +750,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
         /* Add form */
         .sc-form { background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px; display:grid; gap:10px; }
-        .sc-input { background:var(--ink); border:1px solid var(--line); border-radius:7px; padding:10px 12px; color:var(--bone);
+        .sc-input { background:var(--field); border:1px solid var(--line); border-radius:7px; padding:10px 12px; color:var(--bone);
           font-family:var(--sans); font-size:13.5px; width:100%; }
         .sc-input:focus { outline:none; border-color:var(--gold); }
         .sc-input.mono { font-family:var(--mono); font-size:13px; }
@@ -758,10 +765,10 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-cred-bar { display:flex; align-items:center; gap:16px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--line);
           border-radius:10px; padding:14px 18px; margin-bottom:16px; }
         .sc-cred-bar .blk { display:flex; flex-direction:column; gap:3px; }
-        .sc-cred-bar .blk .v { font-family:var(--mono); font-size:18px; font-weight:600; color:var(--gold-bright); }
+        .sc-cred-bar .blk .v { font-family:var(--mono); font-size:18px; font-weight:600; color:var(--num); }
         .sc-cred-bar .blk .l { font-family:var(--mono); font-size:9.5px; letter-spacing:0.12em; color:var(--bone-dim); text-transform:uppercase; }
         .sc-cad { display:flex; align-items:center; gap:8px; margin-left:auto; }
-        .sc-cad input { width:54px; background:var(--ink); border:1px solid var(--line); border-radius:6px; padding:7px 8px; color:var(--bone);
+        .sc-cad input { width:54px; background:var(--field); border:1px solid var(--line); border-radius:6px; padding:7px 8px; color:var(--bone);
           font-family:var(--mono); font-size:14px; text-align:center; }
         .sc-cad input:focus { outline:none; border-color:var(--gold); }
         .sc-cad span { font-family:var(--mono); font-size:11px; color:var(--bone-dim); letter-spacing:0.06em; }
@@ -783,11 +790,11 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           background:none; border:1px solid var(--line); color:var(--bone-dim); border-radius:6px; padding:7px 11px; cursor:pointer; }
         .sc-topup:hover { color:var(--green); border-color:rgba(108,174,126,0.5); }
         .sc-runway { display:flex; align-items:center; gap:10px; margin-top:13px; padding-top:13px; border-top:1px dashed var(--line); flex-wrap:wrap; }
-        .sc-runway input { width:110px; background:var(--ink); border:1px solid var(--line); border-radius:6px; padding:7px 9px; color:var(--bone);
+        .sc-runway input { width:110px; background:var(--field); border:1px solid var(--line); border-radius:6px; padding:7px 9px; color:var(--bone);
           font-family:var(--mono); font-size:12.5px; }
         .sc-runway input:focus { outline:none; border-color:var(--gold); }
         .sc-runway .out { font-family:var(--mono); font-size:12px; }
-        .sc-runway .out b { color:var(--gold-bright); font-size:15px; }
+        .sc-runway .out b { color:var(--num); font-size:15px; }
 
         /* Launchpad */
         .sc-lp-group { margin-bottom:8px; }
@@ -813,7 +820,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         /* Checklist (byggeplan) */
         .sc-ledger { margin-top:8px; padding:18px 20px; background:var(--panel); border:1px solid var(--line); border-radius:10px;
           display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-        .sc-ledger-num { font-family:var(--mono); font-size:30px; font-weight:600; color:var(--gold-bright); line-height:1; min-width:78px; }
+        .sc-ledger-num { font-family:var(--mono); font-size:30px; font-weight:600; color:var(--num); line-height:1; min-width:78px; }
         .sc-ledger-meta { font-family:var(--mono); font-size:10.5px; letter-spacing:0.13em; color:var(--bone-dim); text-transform:uppercase; margin-top:6px; }
         .sc-bar { flex:1 1 200px; height:4px; background:var(--line-soft); border-radius:2px; overflow:hidden; }
         .sc-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright)); border-radius:2px; transition:width 420ms ease; }
@@ -857,7 +864,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-guide-btn { flex-shrink:0; background:none; border:none; cursor:pointer; color:var(--bone-faint); padding:4px; border-radius:4px; transition:transform 200ms; }
         .sc-guide-btn:hover { color:var(--gold); }
         .sc-guide-btn.open { transform:rotate(180deg); color:var(--gold); }
-        .sc-guide { margin:0 20px 16px 54px; padding:12px 16px; background:var(--ink); border-left:2px solid var(--gold); border-radius:0 6px 6px 0; }
+        .sc-guide { margin:0 20px 16px 54px; padding:12px 16px; background:var(--field); border-left:2px solid var(--gold); border-radius:0 6px 6px 0; }
         .sc-guide li { font-size:12.5px; color:var(--bone-dim); line-height:1.6; list-style:none; padding-left:18px; position:relative; margin-bottom:6px; }
         .sc-guide li:last-child { margin-bottom:0; }
         .sc-guide li::before { content:"→"; position:absolute; left:0; color:var(--gold); font-family:var(--mono); font-size:11px; top:2px; }
@@ -870,7 +877,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
         .sc-root button:focus-visible, .sc-root a:focus-visible, .sc-root input:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
         /* v2 additions */
-        .sc-kpi-input { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--gold-bright); line-height:1; background:none; border:none; width:100%; padding:0; }
+        .sc-kpi-input { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--num); line-height:1; background:none; border:none; width:100%; padding:0; }
         .sc-kpi-input:focus { outline:none; color:var(--bone); }
         .sc-kpi-input::placeholder { color:var(--bone-faint); }
         .sc-celebrate { display:flex; align-items:center; gap:10px; margin:10px 0 4px; padding:12px 14px; border-radius:9px; font-size:13.5px;
@@ -889,7 +896,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-ai-sub { font-size:12.5px; color:var(--bone-dim); margin-top:4px; max-width:52ch; }
         .sc-ai-err { margin-top:12px; font-size:12.5px; color:var(--rust); }
         .sc-ai-list { margin-top:14px; display:grid; gap:8px; }
-        .sc-ai-card { display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--ink); border:1px solid var(--line); border-radius:9px; padding:12px 14px; }
+        .sc-ai-card { display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--field); border:1px solid var(--line); border-radius:9px; padding:12px 14px; }
         .sc-ai-name { font-size:14px; font-weight:600; }
         .sc-ai-hook { font-size:12.5px; color:var(--bone-dim); margin-top:3px; line-height:1.4; }
         .sc-btn.primary:disabled { opacity:0.6; cursor:default; }
@@ -956,6 +963,15 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-rollup-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
         .sc-rollup-val { font-family:var(--mono); font-size:12.5px; min-width:78px; text-align:right; flex-shrink:0; }
 
+        /* Lyst-tema: bløde skygger + større radius for premium SaaS-look (reskin) */
+        .sc-kpi,.sc-chan,.sc-cred,.sc-cred-bar,.sc-phase,.sc-gate,.sc-ledger,.sc-next,.sc-sys,.sc-chart,.sc-pipe,.sc-rollup,.sc-ref,.sc-watch,.sc-ai,.sc-form,.sc-lp-link,.sc-ai-card {
+          box-shadow:0 1px 2px rgba(16,24,40,0.04),0 10px 26px -16px rgba(16,24,40,0.16); }
+        .sc-kpi,.sc-chan,.sc-cred,.sc-phase,.sc-gate,.sc-sys,.sc-chart,.sc-pipe,.sc-rollup,.sc-ai,.sc-ledger,.sc-cred-bar { border-radius:16px; }
+        .sc-lp-link:hover { box-shadow:0 1px 2px rgba(16,24,40,0.04),0 12px 28px -12px rgba(201,161,78,0.32); }
+        .sc-livepill { display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; font-weight:600;
+          letter-spacing:0.14em; text-transform:uppercase; color:var(--green); border:1px solid rgba(62,157,94,0.45);
+          background:rgba(62,157,94,0.08); border-radius:20px; padding:4px 11px; }
+        .sc-livepill .d { width:7px; height:7px; border-radius:50%; background:var(--green); }
         @media (prefers-reduced-motion: reduce) { .sc-root * { transition:none !important; } }
         @media (max-width:560px) { .sc-phase-meta .week { display:none; } .sc-guide { margin-left:20px; } }
       ` }} />
@@ -964,13 +980,17 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {/* Masthead */}
         <header className="sc-mast">
           <div>
-            <div className="sc-eyebrow">SOMI Command · Multi-kanal</div>
-            <h1 className="sc-h1">Kommandocentral</h1>
+            <div className="sc-eyebrow">Paper Empires · AI-powered content operations</div>
+            <h1 className="sc-h1" style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+              Command Center
+              <span className="sc-livepill"><span className="d" /> Live</span>
+            </h1>
           </div>
           <div className="sc-mast-meta">
             {save === "saved"
               ? <span className="sc-save"><Check size={12} strokeWidth={3} /> Gemt</span>
               : <span><b>{liveChannels}</b> kanal{liveChannels === 1 ? "" : "er"} live · <b>{pct}%</b> bygget</span>}
+            <div style={{ marginTop: 4 }}>{new Date().toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}</div>
             <div style={{ marginTop: 4 }}>{loaded ? "Gemmes automatisk" : "Indlæser…"}</div>
           </div>
         </header>
@@ -1004,6 +1024,9 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </React.Fragment>
           ))}
         </nav>
+
+        {/* ───────── AGENTER ───────── */}
+        {tab === "agenter" && <AgentsTab />}
 
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (
