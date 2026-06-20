@@ -391,6 +391,7 @@ export default function SomiCommand() {
   const [liveVideos, setLiveVideos] = useState([]); // produktions-kø fra videos-tabellen (read-only)
   const [qcLog, setQcLog] = useState([]);           // seneste QC-domme fra qc_log (read-only)
   const [analytics, setAnalytics] = useState(null); // winner-loop metrics (stats_daily) — KPI-stribe
+  const [creditWatch, setCreditWatch] = useState(null); // live credit/budget-status (n8n CREDIT WATCH) — advarsels-banner
   const [queueRefresh, setQueueRefresh] = useState(0); // bump → IdeaQueueBoard genhenter n8n-køen
   const [queueBusy, setQueueBusy] = useState(false);
   const [channelStats, setChannelStats] = useState(null); // ægte kanal-totaler (YouTube Data API)
@@ -441,6 +442,12 @@ export default function SomiCommand() {
         const ares = await fetch("/api/analytics");
         if (ares.ok) setAnalytics(await ares.json());
       } catch (e) { /* analytics ikke tilgængelig — KPI falder tilbage til manuel */ }
+
+      // Credit/budget-status (n8n CREDIT WATCH → credits-tabel). Tom indtil workflowet har kørt.
+      try {
+        const cres = await fetch("/api/credits");
+        if (cres.ok) setCreditWatch(await cres.json());
+      } catch (e) { /* credits ikke tilgængelige — intet banner */ }
 
       // Ægte kanal-totaler (abonnenter/visninger/videoer) fra YouTube Data API (self-række).
       try {
@@ -1050,6 +1057,21 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         </header>
 
         {/* Active channel = theme + context */}
+        {creditWatch?.alert && (
+          <div style={{
+            margin: "0 0 12px", padding: "10px 14px", borderRadius: 10,
+            background: creditWatch.worst === "low" ? "rgba(201,57,46,0.10)" : "rgba(201,161,78,0.12)",
+            border: "1px solid " + (creditWatch.worst === "low" ? "#C9392E" : "#C9A14E"),
+            color: "var(--ink)", fontSize: 13, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap"
+          }}>
+            <span style={{ fontWeight: 700, color: creditWatch.worst === "low" ? "#C9392E" : "#C9A14E" }}>
+              {creditWatch.worst === "low" ? "⚠ Lavt på credits" : "Credits-varsel"}
+            </span>
+            <span style={{ opacity: 0.9 }}>
+              {creditWatch.items.filter((i) => i.status !== "ok").map((i) => `${i.label}: ${i.remainingPct}% tilbage`).join(" · ")}
+            </span>
+          </div>
+        )}
         <div className="sc-chanbar" aria-label="Aktiv kanal">
           {channels.map((c) => (
             <button key={c.id} className={`sc-chanbar-pill ${activeChan === c.id ? "on" : ""}`}
