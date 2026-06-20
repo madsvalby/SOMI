@@ -9,7 +9,7 @@ import {
   Megaphone, MessageSquare, Pin, Facebook, Bot
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
-import ProposedIdeasPanel from "./ProposedIdeasPanel";
+import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
 
@@ -1702,6 +1702,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               Roadmap-overblik pr. kanal. Den <b>live</b> produktions-kø styres i n8n's ideas-tabel — det her er fugleperspektivet.
             </div>
 
+            <IdeaQueueBoard />
+
             <div className="sc-chan-row" style={{ marginBottom: 16 }}>
               {channels.map((c) => (
                 <button key={c.id} className={`sc-pill static ${activeChan === c.id ? "ok" : "queued"}`}
@@ -1793,8 +1795,6 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                 )}
               </>
             )}
-
-            <ProposedIdeasPanel />
           </>
         )}
 

@@ -39,10 +39,18 @@ export async function GET() {
   const byPriority = (a, b) => (b.priority || 0) - (a.priority || 0);
   const isProposed = (r) => r.source === WINNER_SOURCE || r.status === PROPOSED_STATUS;
 
+  // Kø/næste = endnu ikke produceret (MASTER sætter status til 'scripted' ved pluk).
+  // Sorteres priority ASC (lav = produceres først, matcher MASTER's orderBy).
+  const QUEUE_STATUSES = new Set(["proposed", "candidate", "ready"]);
+  const byPriorityAsc = (a, b) =>
+    (a.priority == null ? Infinity : a.priority) - (b.priority == null ? Infinity : b.priority);
+  const queue = all.filter((r) => QUEUE_STATUSES.has(r.status)).sort(byPriorityAsc);
+
   return NextResponse.json({
+    queue,
     proposed: all.filter(isProposed).sort(byPriority),
     live: all.filter((r) => !isProposed(r)).sort(byPriority),
-    counts: { total: all.length },
+    counts: { total: all.length, queue: queue.length },
   });
 }
 
