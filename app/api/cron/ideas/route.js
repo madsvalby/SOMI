@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeWinnerLoop } from "@/lib/winnerLoop";
 import {
-  buildWinnerPrompt, parseIdeasFromText, anthropicText, buildIdeaRows, WINNER_SOURCE,
+  buildWinnerPrompt, parseIdeasFromText, anthropicText, buildIdeaRows, pushToN8n, WINNER_SOURCE,
 } from "@/lib/ideas";
 
 export const dynamic = "force-dynamic";
@@ -75,13 +75,19 @@ export async function GET(request) {
       return NextResponse.json({ ok: true, inserted: 0, skipped });
     }
 
-    const { data: inserted, error: insErr } = await admin.from("ideas").insert(rows).select("id");
+    const { data: inserted, error: insErr } = await admin
+      .from("ideas")
+      .upsert(rows, { onConflict: "id" })
+      .select("id");
     if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
+
+    const n8n = await pushToN8n(rows);
 
     return NextResponse.json({
       ok: true,
       inserted: (inserted || []).length,
       skipped,
+      n8n,
       generatedAt: loop.generatedAt,
     });
   } catch (e) {

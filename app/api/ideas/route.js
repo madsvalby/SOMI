@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { buildIdeaRows, WINNER_SOURCE, PROPOSED_STATUS } from "@/lib/ideas";
+import { buildIdeaRows, pushToN8n, WINNER_SOURCE, PROPOSED_STATUS } from "@/lib/ideas";
 
 export const dynamic = "force-dynamic";
 
@@ -73,16 +73,22 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, inserted: 0, skipped, rows: [] });
   }
 
+  // Upsert på id (=case_id) → idempotent, og samme nøgle som SYNC bruger, så
+  // n8n-spejlingen senere merger ind i samme række frem for at lave en dublet.
   const { data: inserted, error: insErr } = await admin
     .from("ideas")
-    .insert(rows)
+    .upsert(rows, { onConflict: "id" })
     .select("id,case_id,title,hook,source,status,priority");
   if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
+
+  // Push videre til n8n's produktions-kø (hvis intake-webhook er konfigureret).
+  const n8n = await pushToN8n(rows);
 
   return NextResponse.json({
     ok: true,
     inserted: (inserted || []).length,
     skipped,
+    n8n,
     rows: (inserted || []).map(shape),
   });
 }
