@@ -8,6 +8,7 @@ import {
 import { getAgents, AGENT_STATUS_META, AGENTS_ARE_MOCK, EXECUTIONS_URL } from "@/lib/agents";
 import { MOCK_SKILLS, runSkill } from "@/lib/agentSkills";
 import { loadKey, saveKey } from "@/lib/dashboardState";
+import InsightsPanel from "./InsightsPanel";
 
 const K_SKILLS = "somi_agent_skills_v1";
 
@@ -266,6 +267,8 @@ export default function AgentsTab() {
           </div>
         );
       })}
+
+      <InsightsPanel />
 
       <div className="sc-foot" style={{ marginTop: 26 }}>
         <span className="sc-foot-note">Skills-status gemmes pr. bruger · webhooks kalder n8n direkte</span>
