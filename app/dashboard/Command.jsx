@@ -1755,11 +1755,11 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               );
             })}
 
-            <div className="sc-section-label"><GitBranch size={11} strokeWidth={2.4} /> Næste increment (n8n)</div>
+            <div className="sc-section-label"><GitBranch size={11} strokeWidth={2.4} /> Automatiserings-status (n8n)</div>
             <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)", display: "block", lineHeight: 1.6 }}>
-              <b style={{ color: "var(--green)" }}>Kan automatiseres:</b> FB side-opslag + YT auto-top-kommentar bygges som to n8n-workflows kaldt fra MASTER efter upload —
-              venter på dine FB Page-tokens (App Review/Business Verification) og at Google-scopet udvides til <code>youtube.force-ssl</code>.<br />
-              <b style={{ color: "var(--bone-faint)" }}>Forbliver manuelt:</b> YouTube community-post og pin af kommentar (ingen API) — pipelinen kan sende dig en påmindelse med færdig tekst.
+              <b style={{ color: "var(--green)" }}>Live nu:</b> Facebook side-opslag postes automatisk når en video bliver offentlig — watcheren "SOMI FB ANNOUNCE" opdager publicering via YouTube oEmbed (intet scope nødvendigt), Claude skriver opslaget, og det poster til siden med link.<br />
+              <b style={{ color: "var(--amber, #C9A14E)" }}>Venter på scope:</b> YouTube auto-top-kommentar + pin-kommentar kræver at Google-scopet udvides til <code>youtube.force-ssl</code>.<br />
+              <b style={{ color: "var(--bone-faint)" }}>Forbliver manuelt:</b> YouTube community-post (ingen API) — pipelinen kan sende dig en påmindelse med færdig tekst.
             </div>
           </>
         )}
