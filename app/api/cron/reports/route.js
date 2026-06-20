@@ -91,7 +91,10 @@ export async function GET(request) {
         const title = deriveTitle(report);
         await admin.from("reports").update({ body_md: report, title, status: "done" }).eq("id", p.id);
         out.ingested++;
-        try { await fetch(EMAIL_HOOK, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ subject: "SOMI Edge — ugentlig rapport", text: report }) }); } catch (e) { /* email best-effort */ }
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://somi-phi.vercel.app";
+        const reportUrl = `${siteUrl}/rapport/${p.id}`;
+        const emailText = `Din ugentlige SOMI Edge-rapport er klar.\n\nLæs den med grafer og layout her:\n${reportUrl}\n\n———\n\n${report}`;
+        try { await fetch(EMAIL_HOOK, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ subject: title, text: emailText }) }); } catch (e) { /* email best-effort */ }
         try { await fetch(`https://api.anthropic.com/v1/sessions/${p.session_id}/archive`, { method: "POST", headers: aHeaders(key) }); } catch (e) { /* */ }
       }
     }

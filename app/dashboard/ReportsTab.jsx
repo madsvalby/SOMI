@@ -125,8 +125,13 @@ export default function ReportsTab() {
 
       {/* Indhold */}
       <div style={{ background: "var(--panel, #fff)", border: "1px solid " + LINE, borderRadius: 12, padding: "18px 22px" }}>
-        <div style={{ fontSize: 11, color: MUTE, marginBottom: 10, fontFamily: "var(--mono, monospace)", letterSpacing: "0.05em" }}>
-          {fmtDate(current.created_at)} · SOMI Edge
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ fontSize: 11, color: MUTE, fontFamily: "var(--mono, monospace)", letterSpacing: "0.05em" }}>
+            {fmtDate(current.created_at)} · SOMI Edge
+          </div>
+          <a href={"/rapport/" + current.id} target="_blank" rel="noreferrer" style={{ fontSize: 11.5, color: GOLD, fontWeight: 600, textDecoration: "none" }}>
+            Åbn som side ↗
+          </a>
         </div>
         <div>{renderMarkdown(current.body_md)}</div>
       </div>
