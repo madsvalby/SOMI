@@ -85,6 +85,10 @@ export default function IdeaQueueBoard({ refreshKey = 0 }) {
           border-radius:6px; padding:3px 7px; border:1px solid var(--line); color:var(--bone-dim); }
         .iqb-badge.ready { color:var(--green); border-color:rgba(62,157,94,0.45); background:rgba(62,157,94,0.08); }
         .iqb-badge.proposed { color:var(--gold); border-color:rgba(201,161,78,0.45); }
+        .iqb-score { flex-shrink:0; font-family:var(--mono); font-size:11px; font-weight:600; color:var(--num);
+          border:1px solid var(--line); border-radius:6px; padding:3px 7px; min-width:34px; text-align:center; }
+        .iqb-score.hi { color:var(--green); border-color:rgba(62,157,94,0.4); }
+        .iqb-score.lo { color:var(--rust); border-color:rgba(176,74,52,0.4); }
       ` }} />
 
       <div className="sc-section-label" style={{ marginTop: 22, justifyContent: "space-between" }}>
@@ -100,7 +104,7 @@ export default function IdeaQueueBoard({ refreshKey = 0 }) {
         </span>
       </div>
       <div className="sc-lede" style={{ marginTop: 0, marginBottom: 8, fontSize: 12 }}>
-        Toppen produceres først. MASTER henter de <b>klar</b>-markerede idéer i denne rækkefølge. Forslag/kandidater venter på at blive sat til "klar" i n8n.
+        Forslag scores automatisk af research-agenten (hver 2. time) — gode sager (70+) bliver <b>klar</b> og produceres. Toppen produceres først; træk for at ændre rækkefølgen.
       </div>
 
       {loading && <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>Henter kø…</div>}
@@ -128,6 +132,9 @@ export default function IdeaQueueBoard({ refreshKey = 0 }) {
                 <div className="iqb-t">{it.title}</div>
                 {it.hook && <div className="iqb-h">{it.hook}</div>}
               </div>
+              {it.score != null && (
+                <span className={"iqb-score" + (it.score >= 70 ? " hi" : " lo")} title="Research-score">{it.score}</span>
+              )}
               <span className={"iqb-badge " + (it.status || "")}>{STATUS_LABEL[it.status] || it.status || "—"}</span>
             </div>
           ))}

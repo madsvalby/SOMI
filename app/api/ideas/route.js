@@ -22,6 +22,7 @@ function shape(r) {
     source: r.source || "",
     status: r.status || "",
     priority: r.priority == null ? null : Number(r.priority),
+    score: r.score == null ? null : Number(r.score),
   };
 }
 
@@ -32,7 +33,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("ideas")
-    .select("id,case_id,title,hook,source,status,priority");
+    .select("id,case_id,title,hook,source,status,priority,score");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const all = (data || []).map(shape);
