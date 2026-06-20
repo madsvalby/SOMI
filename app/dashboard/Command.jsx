@@ -391,6 +391,8 @@ export default function SomiCommand() {
   const [analytics, setAnalytics] = useState(null); // winner-loop metrics (stats_daily) — KPI-stribe
   const [queueRefresh, setQueueRefresh] = useState(0); // bump → IdeaQueueBoard genhenter n8n-køen
   const [queueBusy, setQueueBusy] = useState(false);
+  const [channelStats, setChannelStats] = useState(null); // ægte kanal-totaler (YouTube Data API)
+  const [kpiPlatform, setKpiPlatform] = useState("samlet"); // Samlet | youtube | facebook
 
   // ── Load ──
   useEffect(() => {
@@ -437,6 +439,19 @@ export default function SomiCommand() {
         const ares = await fetch("/api/analytics");
         if (ares.ok) setAnalytics(await ares.json());
       } catch (e) { /* analytics ikke tilgængelig — KPI falder tilbage til manuel */ }
+
+      // Ægte kanal-totaler (abonnenter/visninger/videoer) fra YouTube Data API (self-række).
+      try {
+        const cres = await fetch("/api/competitors");
+        if (cres.ok) {
+          const cj = await cres.json();
+          const self = (cj.competitors || []).find((c) => c.isSelf);
+          setChannelStats({
+            yt: self ? { videos: self.videos, views: self.views, subs: self.subs } : null,
+            fb: null, // Facebook-stats kobles på senere
+          });
+        }
+      } catch (e) { /* kanal-stats ikke tilgængelige */ }
 
       setLoaded(true);
     })();
@@ -1077,19 +1092,44 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               <div className="sc-kpi"><div className="sc-kpi-num" style={{ color: alerts.length ? "var(--rust)" : "var(--green)" }}>{alerts.length}</div><div className="sc-kpi-lbl">Konti at fylde</div></div>
             </div>
 
-            {analytics?.hasData ? (
+            {(channelStats && (channelStats.yt || channelStats.fb)) ? (() => {
+              const yt = channelStats.yt, fb = channelStats.fb, P = kpiPlatform;
+              const pick = (k) => {
+                const y = yt ? Number(yt[k]) || 0 : null;
+                const f = fb ? Number(fb[k]) || 0 : null;
+                if (P === "youtube") return y;
+                if (P === "facebook") return f;
+                if (y == null && f == null) return null;
+                return (y || 0) + (f || 0);
+              };
+              const fmtVal = (v) => (v == null ? "—" : nfDK(v));
+              const labels = P === "facebook"
+                ? { videos: "Opslag", views: "Rækkevidde", subs: "Følgere" }
+                : { videos: "Videoer udgivet", views: "Visninger i alt", subs: "Abonnenter" };
+              return (
+                <>
+                  <div className="sc-section-label" style={{ justifyContent: "space-between" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · live</span>
+                    <span style={{ display: "inline-flex", gap: 6 }}>
+                      {[["samlet", "Samlet"], ["youtube", "YouTube"], ["facebook", "Facebook"]].map(([k, l]) => (
+                        <button key={k} className="sc-pill" style={kpiPlatform === k
+                          ? { cursor: "pointer", borderColor: "var(--gold)", color: "var(--gold)", background: "rgba(201,161,78,0.10)" }
+                          : { cursor: "pointer" }} onClick={() => setKpiPlatform(k)}>{l}</button>
+                      ))}
+                    </span>
+                  </div>
+                  <div className="sc-kpis">
+                    <div className="sc-kpi"><div className="sc-kpi-num">{fmtVal(pick("videos"))}</div><div className="sc-kpi-lbl">{labels.videos}</div></div>
+                    <div className="sc-kpi"><div className="sc-kpi-num">{fmtVal(pick("views"))}</div><div className="sc-kpi-lbl">{labels.views}</div></div>
+                    <div className="sc-kpi"><div className="sc-kpi-num">{fmtVal(pick("subs"))}</div><div className="sc-kpi-lbl">{labels.subs}</div></div>
+                  </div>
+                  {P === "facebook" && !fb && <div className="sc-lede" style={{ marginTop: 6, marginBottom: 0, fontSize: 11.5 }}>Facebook-tal kobles på når FB-statistik integreres.</div>}
+                  {P === "samlet" && !fb && <div className="sc-lede" style={{ marginTop: 6, marginBottom: 0, fontSize: 11.5 }}>Viser YouTube indtil Facebook-stats er koblet på.</div>}
+                </>
+              );
+            })() : (
               <>
-                <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · live fra YouTube Analytics</div>
-                <div className="sc-kpis">
-                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.totalViews)}</div><div className="sc-kpi-lbl">Visninger i alt</div></div>
-                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK((analytics.metrics.totalWatchMin || 0) / 60)}</div><div className="sc-kpi-lbl">Watch-timer</div></div>
-                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.totalSubs)}</div><div className="sc-kpi-lbl">Nye abonnenter</div></div>
-                  <div className="sc-kpi"><div className="sc-kpi-num">{nfDK(analytics.metrics.videosWithViews)}</div><div className="sc-kpi-lbl">Videoer med views</div></div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · manuelt indtil Analytics har data</div>
+                <div className="sc-section-label"><TrendingUp size={11} strokeWidth={2.4} /> Nøgletal · manuelt indtil data er koblet på</div>
                 <div className="sc-kpis">
                   {[{ k: "videos", l: "Videoer udgivet" }, { k: "views", l: "Visninger i alt" }, { k: "subs", l: "Abonnenter" }].map((m) => (
                     <div className="sc-kpi" key={m.k}>

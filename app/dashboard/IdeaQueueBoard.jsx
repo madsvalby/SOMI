@@ -89,6 +89,11 @@ export default function IdeaQueueBoard({ refreshKey = 0 }) {
           border:1px solid var(--line); border-radius:6px; padding:3px 7px; min-width:34px; text-align:center; }
         .iqb-score.hi { color:var(--green); border-color:rgba(62,157,94,0.4); }
         .iqb-score.lo { color:var(--rust); border-color:rgba(176,74,52,0.4); }
+        .iqb-headrow { display:flex; align-items:center; gap:11px; padding:2px 13px 4px; }
+        .iqb-hl { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--bone-faint); }
+        .iqb-hl.title { flex:1; padding-left:38px; }
+        .iqb-hl.score { width:34px; text-align:center; flex-shrink:0; }
+        .iqb-hl.status { width:62px; text-align:center; flex-shrink:0; }
       ` }} />
 
       <div className="sc-section-label" style={{ marginTop: 22, justifyContent: "space-between" }}>
@@ -112,6 +117,14 @@ export default function IdeaQueueBoard({ refreshKey = 0 }) {
       {!loading && !items.length && (
         <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
           Køen er tom. Forslag fra winner-loop (Agenter-fanen) og TREND-agenten lander her.
+        </div>
+      )}
+
+      {!loading && items.length > 0 && (
+        <div className="iqb-headrow">
+          <span className="iqb-hl title">Sag</span>
+          <span className="iqb-hl score">Score</span>
+          <span className="iqb-hl status">Status</span>
         </div>
       )}
 
