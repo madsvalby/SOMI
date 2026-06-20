@@ -68,6 +68,21 @@ drop policy if exists "auth read" on public.earnings;
 create policy "auth read" on public.earnings
   for select using (auth.role() = 'authenticated');
 
+-- ── Konkurrent-benchmark (YouTube Data API → cron → dashboard) ──
+-- Cron (service_role) upserter offentlige kanal-tal; login læser. handle er nøgle
+-- ('__self__' = vores egen kanal, fremhæves i benchmark-visningen).
+create table if not exists public.competitors (
+  handle text primary key,
+  name text, channel_id text,
+  subs bigint, views bigint, videos bigint,
+  is_self boolean default false,
+  updated_at timestamptz default now()
+);
+alter table public.competitors enable row level security;
+drop policy if exists "auth read" on public.competitors;
+create policy "auth read" on public.competitors
+  for select using (auth.role() = 'authenticated');
+
 -- Naturlige nøgler → idempotent upsert (cron + n8n-sync via PostgREST merge-duplicates)
 create unique index if not exists stats_daily_video_date_uidx on public.stats_daily (video_id, date);
 create unique index if not exists costlog_video_step_uidx on public.costlog (video_id, step);

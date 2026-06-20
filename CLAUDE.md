@@ -65,6 +65,7 @@ Next.js 14.2.x (App Router, **JavaScript — ikke TypeScript**), React 18, `@sup
 | `CRON_SECRET` | en tilfældig streng du selv finder på |
 | `N8N_API_KEY` | n8n → Settings → n8n API (til live agent-status på Agenter-fanen; valgfri — UI falder tilbage til demo uden den) |
 | `N8N_IDEAS_WEBHOOK_URL` | Auto-idé-loop Lag B: production-URL fra workflowet "SOMI IDEAS INTAKE" (`gPsOB8YR1nveyn8i`). Valgfri — uden den skrives forslag kun til Supabase. Se `docs/setup-ideas-loop.md` |
+| `YOUTUBE_API_KEY` | Konkurrent-benchmark: YouTube Data API v3-nøgle (offentlige kanal-tal). Valgfri — benchmark-modulet er tomt uden den. Cron: `/api/cron/competitors` (via `/api/cron/daily`) |
 
 ## Regler (vigtigt)
 - **Hemmeligheder aldrig i git eller i klienten.** `.env.local` er git-ignored. `service_role`-nøglen

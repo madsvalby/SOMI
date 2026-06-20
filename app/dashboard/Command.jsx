@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
 import ProposedIdeasPanel from "./ProposedIdeasPanel";
+import CompetitorBenchmark from "./CompetitorBenchmark";
 
 // ─────────────────────────────────────────────────────────────
 // SOMI COMMAND · Kommandocentral
@@ -1082,6 +1083,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             <div style={{ marginTop: 10 }}>
               <button className="sc-link ghost" onClick={() => setTab("okonomi")}>Indtjening pr. kanal & kilde <ArrowRight size={12} /></button>
             </div>
+
+            <CompetitorBenchmark />
 
             <div className="sc-section-label"><Eye size={11} strokeWidth={2.4} /> Watch-items</div>
             {WATCH_ITEMS.map((w, i) => (
