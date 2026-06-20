@@ -1673,6 +1673,16 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                     );
                   })()}
 
+                  {c.id !== "elevenlabs" && (
+                    <div className="sc-runway">
+                      <input type="text" placeholder="Saldo (fx 120 DKK)" value={c.balance || ""}
+                        onChange={(e) => patchCredit(c.id, { balance: e.target.value })} aria-label="Saldo" />
+                      <span className="out">{c.balance
+                        ? <>saldo: <b>{c.balance}</b></>
+                        : <span style={{ color: "var(--bone-faint)" }}>indtast saldo (intet API)</span>}</span>
+                    </div>
+                  )}
+
                   <div className="sc-cred-foot">
                     <button className="sc-topup" onClick={() => markTopup(c.id)}><Check size={12} strokeWidth={2.5} /> Fyldt op i dag</button>
                     <span className="since">{since == null ? "ingen top-up logget" : since === 0 ? "fyldt op i dag" : `${since} dag${since === 1 ? "" : "e"} siden top-up`}</span>
