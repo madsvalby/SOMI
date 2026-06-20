@@ -9,6 +9,7 @@ import {
   Megaphone, MessageSquare, Pin, Facebook, Bot
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
+import PerformanceTab from "./PerformanceTab";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
@@ -292,6 +293,7 @@ const PIPE_ORDER = ["idle", "producing", "published", "error"];
 const NAV_GROUPS = [
   { tabs: [
     { id: "overblik", label: "Overblik", Icon: LayoutGrid },
+    { id: "udvikling", label: "Udvikling", Icon: Activity },
     { id: "agenter", label: "Agenter", Icon: Bot },
   ] },
   { label: "Drift", tabs: [
@@ -1103,6 +1105,9 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
         {/* ───────── AGENTER ───────── */}
         {tab === "agenter" && <AgentsTab />}
+
+        {/* ───────── UDVIKLING ───────── */}
+        {tab === "udvikling" && <PerformanceTab />}
 
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (
