@@ -11,6 +11,7 @@ import {
 import AgentsTab from "./AgentsTab";
 import ProposedIdeasPanel from "./ProposedIdeasPanel";
 import CompetitorBenchmark from "./CompetitorBenchmark";
+import TodaysMission from "./TodaysMission";
 
 // ─────────────────────────────────────────────────────────────
 // SOMI COMMAND · Kommandocentral
@@ -1041,6 +1042,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (
           <>
+            <TodaysMission analytics={analytics} liveVideos={liveVideos} onGoto={setTab} />
+
             <div className="sc-kpis">
               <div className="sc-kpi"><div className="sc-kpi-num">{liveChannels}/{channels.length}</div><div className="sc-kpi-lbl">Kanaler live</div></div>
               <div className="sc-kpi"><div className="sc-kpi-num">{pct}%</div><div className="sc-kpi-lbl">Byggeplan</div></div>
