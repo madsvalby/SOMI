@@ -1673,9 +1673,30 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                     );
                   })()}
 
-                  {c.id !== "elevenlabs" && (
+                  {c.id === "gemini" && (() => {
+                    const rate = 6.9; // ca. DKK pr. USD
+                    const bal = Number(c.geminiBalance) || 0;
+                    const bd = c.geminiBalanceDate || "";
+                    const gbd = (creditWatch && creditWatch.geminiByDate) || {};
+                    let spentUsd = 0;
+                    if (bd) { for (const d in gbd) { if (d > bd) spentUsd += Number(gbd[d]) || 0; } }
+                    const spentDkk = Math.round(spentUsd * rate);
+                    const remain = bal > 0 ? Math.max(0, Math.round(bal - spentDkk)) : null;
+                    const low = remain != null && bal > 0 && remain <= bal * 0.2;
+                    return (
+                      <div className="sc-runway" style={{ flexWrap: "wrap" }}>
+                        <input type="number" placeholder="Saldo i DKK (fx 120)" value={c.geminiBalance || ""}
+                          onChange={(e) => patchCredit(c.id, { geminiBalance: e.target.value, geminiBalanceDate: todayISO() })} aria-label="Gemini-saldo DKK" />
+                        <span className="out" style={{ fontSize: 12 }}>{remain != null
+                          ? <>≈ <b style={{ color: low ? "var(--rust)" : "var(--ink)" }}>{remain} DKK</b> tilbage <span style={{ color: "var(--bone-faint)" }}>(sat {bd} · −{spentDkk} DKK forbrug)</span></>
+                          : <span style={{ color: "var(--bone-faint)" }}>indtast saldo → estimeres ud fra Gemini-forbrug</span>}</span>
+                      </div>
+                    );
+                  })()}
+
+                  {c.id !== "elevenlabs" && c.id !== "gemini" && (
                     <div className="sc-runway">
-                      <input type="text" placeholder="Saldo (fx 120 DKK)" value={c.balance || ""}
+                      <input type="text" placeholder="Saldo (fx $20)" value={c.balance || ""}
                         onChange={(e) => patchCredit(c.id, { balance: e.target.value })} aria-label="Saldo" />
                       <span className="out">{c.balance
                         ? <>saldo: <b>{c.balance}</b></>

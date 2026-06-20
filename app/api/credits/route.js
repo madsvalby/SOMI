@@ -13,11 +13,22 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { data, error } = await supabase
-    .from("credits")
-    .select("platform,used,total,remaining_pct,status,note,updated_at");
+  const [{ data, error }, gemR] = await Promise.all([
+    supabase.from("credits").select("platform,used,total,remaining_pct,status,note,updated_at"),
+    // Gemini-forbrug pr. dag (til semi-automatisk saldo-estimat på Kreditter-fanen)
+    supabase.from("costlog").select("usd_cost,model,ts"),
+  ]);
 
   if (error) return NextResponse.json({ items: [], alert: false });
+
+  const geminiByDate = {};
+  (gemR.data || []).forEach((c) => {
+    const m = String(c.model || "").toLowerCase();
+    if (!(m.includes("gemini") || m.includes("nano"))) return;
+    const d = String(c.ts || "").slice(0, 10);
+    if (!d) return;
+    geminiByDate[d] = Math.round(((geminiByDate[d] || 0) + (Number(c.usd_cost) || 0)) * 10000) / 10000;
+  });
 
   const LABELS = {
     elevenlabs: "ElevenLabs (VO)",
@@ -37,6 +48,7 @@ export async function GET() {
   const warn = items.filter((i) => i.status === "warn" || i.status === "low");
   return NextResponse.json({
     items,
+    geminiByDate,
     alert: warn.length > 0,
     worst: warn.some((i) => i.status === "low") ? "low" : warn.length ? "warn" : "ok",
   });
