@@ -53,9 +53,11 @@ export async function GET(request) {
       rows.push({ handle: c.handle, name: c.name || data.name, ...data, is_self: false, updated_at: now });
     }
 
+    let selfData = null;
     if (process.env.YT_CHANNEL_ID) {
       const me = await fetchChannel(key, `id=${encodeURIComponent(process.env.YT_CHANNEL_ID)}`);
       if (!me.error && !me.missing) {
+        selfData = me;
         rows.push({ handle: SELF_HANDLE, name: me.name || "Paper Empires", ...me, is_self: true, updated_at: now });
       }
     }
@@ -67,6 +69,18 @@ export async function GET(request) {
     const admin = createAdminClient();
     const { error } = await admin.from("competitors").upsert(rows, { onConflict: "handle" });
     if (error) return NextResponse.json({ error: "competitors: " + error.message }, { status: 500 });
+
+    // Daglig tidsserie til Udvikling-graferne: kanal-totaler (subs/views/videoer)
+    // + dagens omkostning → channel_daily. YouTube Data API giver kun et øjebliks-
+    // billede, så vi MÅ snapshotte dagligt for at bygge subs/views-historik.
+    try {
+      const today = now.slice(0, 10);
+      const { data: costRows } = await admin.from("costlog").select("usd_cost").gte("ts", today + "T00:00:00.000Z");
+      const costToday = Math.round((costRows || []).reduce((a, r) => a + (Number(r.usd_cost) || 0), 0) * 10000) / 10000;
+      const snap = { date: today, cost_usd: costToday };
+      if (selfData) { snap.subs = selfData.subs; snap.views = selfData.views; snap.videos = selfData.videos; }
+      await admin.from("channel_daily").upsert(snap, { onConflict: "date" });
+    } catch (e) { /* snapshot er best-effort — bryder ikke competitors-opdateringen */ }
 
     return NextResponse.json({ ok: true, upserted: rows.length, skipped });
   } catch (e) {
