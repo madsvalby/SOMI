@@ -12,6 +12,18 @@ import InsightsPanel from "./InsightsPanel";
 
 const K_SKILLS = "somi_agent_skills_v1";
 
+function relTime(iso) {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return null;
+  const min = Math.floor((Date.now() - t) / 60000);
+  if (min < 1) return "lige nu";
+  if (min < 60) return `for ${min} min siden`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `for ${h} t siden`;
+  return `for ${Math.floor(h / 24)} d siden`;
+}
+
 const ICONS = {
   lightbulb: Lightbulb, search: Search, penLine: PenLine, shieldCheck: ShieldCheck,
   mic: Mic, image: ImageIcon, tag: Tag, uploadCloud: UploadCloud, zap: Zap,
@@ -20,6 +32,7 @@ const ICONS = {
 
 export default function AgentsTab() {
   const agents = useMemo(() => getAgents(), []);
+  const [live, setLive] = useState(null); // { hasLive, byWorkflow } fra /api/agents
   const [selected, setSelected] = useState(null); // agentId eller null = alle
   const [overrides, setOverrides] = useState({}); // { [skillId]: {enabled, webhookUrl, config} }
   const [configOpen, setConfigOpen] = useState(null);
@@ -33,6 +46,30 @@ export default function AgentsTab() {
       if (o && typeof o === "object") setOverrides(o);
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/agents");
+        if (res.ok) setLive(await res.json());
+      } catch (e) { /* falder tilbage til demo-status */ }
+    })();
+  }, []);
+
+  const isLive = !!(live && live.hasLive);
+  const liveAgents = useMemo(() => {
+    if (!isLive) return agents;
+    return agents.map((a) => {
+      const lv = a.wfId && live.byWorkflow ? live.byWorkflow[a.wfId] : null;
+      if (!lv) return a;
+      return {
+        ...a,
+        status: lv.status || a.status,
+        lastRun: relTime(lv.lastRun) || a.lastRun,
+        successRate: lv.successRate != null ? lv.successRate : a.successRate,
+      };
+    });
+  }, [agents, live, isLive]);
 
   const persist = (next) => { setOverrides(next); saveKey(K_SKILLS, next); };
 
@@ -60,7 +97,7 @@ export default function AgentsTab() {
     setResults((r) => ({ ...r, [s.id]: res }));
   };
 
-  const shownAgents = selected ? agents.filter((a) => a.id === selected) : agents;
+  const shownAgents = selected ? liveAgents.filter((a) => a.id === selected) : liveAgents;
   const skillCount = (agentId) => MOCK_SKILLS.filter((s) => s.agentId === agentId).length;
 
   return (
@@ -159,11 +196,13 @@ export default function AgentsTab() {
         <p className="sc-lede" style={{ margin: 0 }}>
           Hver agent svarer til en del af content-pipelinen. Klik en agent for at se og styre dens skills.
         </p>
-        {AGENTS_ARE_MOCK && <span className="agt-demo"><AlertTriangle size={11} /> Demo-status · n8n-live følger</span>}
+        {isLive
+          ? <span className="agt-demo" style={{ color: "var(--green)", borderColor: "rgba(62,157,94,0.45)" }}><Check size={11} /> Live fra n8n</span>
+          : <span className="agt-demo"><AlertTriangle size={11} /> Demo-status · sæt N8N_API_KEY for live</span>}
       </div>
 
       <div className="agt-grid">
-        {agents.map((a) => {
+        {liveAgents.map((a) => {
           const Ic = ICONS[a.icon] || Bot;
           const meta = AGENT_STATUS_META[a.status] || AGENT_STATUS_META.idle;
           return (
@@ -202,7 +241,7 @@ export default function AgentsTab() {
       <div className="sc-section-label"><Sparkles size={11} strokeWidth={2.4} /> Agent skills</div>
       <div className="agt-filterbar">
         <button className={`agt-chip ${selected === null ? "on" : ""}`} onClick={() => setSelected(null)}>Alle agenter</button>
-        {agents.filter((a) => skillCount(a.id) > 0).map((a) => (
+        {liveAgents.filter((a) => skillCount(a.id) > 0).map((a) => (
           <button key={a.id} className={`agt-chip ${selected === a.id ? "on" : ""}`} onClick={() => setSelected(a.id)}>{a.name}</button>
         ))}
       </div>
