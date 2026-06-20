@@ -6,10 +6,11 @@ import {
   Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap, CircleDot, Lock,
   Wand2, Download, Loader2, TrendingUp, Coins, Activity,
   Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge,
-  Megaphone, MessageSquare, Pin, Facebook, Bot
+  Megaphone, MessageSquare, Pin, Facebook, Bot, FileText
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
 import PerformanceTab from "./PerformanceTab";
+import ReportsTab from "./ReportsTab";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
@@ -294,6 +295,7 @@ const NAV_GROUPS = [
   { tabs: [
     { id: "overblik", label: "Overblik", Icon: LayoutGrid },
     { id: "udvikling", label: "Udvikling", Icon: Activity },
+    { id: "rapporter", label: "Rapporter", Icon: FileText },
     { id: "agenter", label: "Agenter", Icon: Bot },
   ] },
   { label: "Drift", tabs: [
@@ -1108,6 +1110,9 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
         {/* ───────── UDVIKLING ───────── */}
         {tab === "udvikling" && <PerformanceTab />}
+
+        {/* ───────── RAPPORTER ───────── */}
+        {tab === "rapporter" && <ReportsTab />}
 
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (
