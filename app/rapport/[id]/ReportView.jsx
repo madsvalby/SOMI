@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import {
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 
 const GOLD = "#C9A14E";
@@ -54,10 +54,11 @@ function renderMarkdown(md) {
 const tip = { background: "#fff", border: "1px solid " + GRID, borderRadius: 8, fontSize: 12, color: INK };
 
 export default function ReportView({ report, series }) {
-  const sd = (series || []).map((s) => ({ ...s, d: dShort(s.date), subs: s.subs == null ? null : Number(s.subs), cost: s.cost_usd == null ? 0 : Number(s.cost_usd) }));
+  const sd = (series || []).map((s) => ({ ...s, d: dShort(s.date), subs: s.subs == null ? null : Number(s.subs), views: s.views == null ? null : Number(s.views), cost: s.cost_usd == null ? 0 : Number(s.cost_usd) }));
   const subsData = sd.filter((s) => s.subs != null);
+  const viewsData = sd.filter((s) => s.views != null);
   const costData = sd.filter((s) => s.cost != null);
-  const hasCharts = subsData.length > 0 || costData.length > 1;
+  const hasCharts = subsData.length > 0 || viewsData.length > 0 || costData.length > 1;
 
   return (
     <div className="rv-root">
@@ -109,6 +110,22 @@ export default function ReportView({ report, series }) {
                         <Tooltip contentStyle={tip} formatter={(v) => [nf.format(v), "Abonnenter"]} />
                         <Area type="monotone" dataKey="subs" stroke={TEAL} strokeWidth={2} fill="url(#rgS)" dot={{ r: 2.5, fill: TEAL }} />
                       </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+              {viewsData.length > 0 && (
+                <div className="rv-chartcard">
+                  <div className="rv-chartlbl">Visninger over tid</div>
+                  <div style={{ width: "100%", height: 170 }}>
+                    <ResponsiveContainer>
+                      <LineChart data={viewsData} margin={{ top: 6, right: 8, left: -12, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="d" tick={{ fill: MUTE, fontSize: 10 }} tickLine={false} axisLine={{ stroke: GRID }} />
+                        <YAxis tick={{ fill: MUTE, fontSize: 10 }} tickLine={false} axisLine={false} width={36} />
+                        <Tooltip contentStyle={tip} formatter={(v) => [nf.format(v), "Visninger"]} />
+                        <Line type="monotone" dataKey="views" stroke="#4A6FA5" strokeWidth={2} dot={{ r: 2.5, fill: "#4A6FA5" }} />
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                 </div>

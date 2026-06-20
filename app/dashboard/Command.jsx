@@ -1649,15 +1649,29 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                   <div className="sc-cred-note">{c.note}</div>
                   <div className="sc-cred-burn">⛽ {c.burn}</div>
 
-                  {c.id === "elevenlabs" && (
-                    <div className="sc-runway">
-                      <input type="number" placeholder="Resterende tegn" value={c.runwayChars}
-                        onChange={(e) => patchCredit(c.id, { runwayChars: e.target.value })} aria-label="Resterende tegn" />
-                      <span className="out">{videosLeft != null
-                        ? <>≈ <b>{videosLeft}</b> videoer tilbage</>
-                        : <span style={{ color: "var(--bone-faint)" }}>indtast saldo → runway</span>}</span>
-                    </div>
-                  )}
+                  {c.id === "elevenlabs" && (() => {
+                    const live = ((creditWatch && creditWatch.items) || []).find((x) => x.platform === "elevenlabs");
+                    const liveRemain = live && live.total != null && live.used != null ? Math.max(0, Number(live.total) - Number(live.used)) : null;
+                    if (liveRemain != null) {
+                      const lv = Math.floor(liveRemain / 14000);
+                      return (
+                        <div className="sc-runway">
+                          <span className="out" style={{ fontSize: 12.5 }}>
+                            <b style={{ color: "var(--gold)" }}>Live</b> · {liveRemain.toLocaleString("da-DK")} tegn ({live.remainingPct}%) · ≈ <b>{lv}</b> videoer
+                          </span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="sc-runway">
+                        <input type="number" placeholder="Resterende tegn" value={c.runwayChars}
+                          onChange={(e) => patchCredit(c.id, { runwayChars: e.target.value })} aria-label="Resterende tegn" />
+                        <span className="out">{videosLeft != null
+                          ? <>≈ <b>{videosLeft}</b> videoer tilbage</>
+                          : <span style={{ color: "var(--bone-faint)" }}>indtast saldo → runway</span>}</span>
+                      </div>
+                    );
+                  })()}
 
                   <div className="sc-cred-foot">
                     <button className="sc-topup" onClick={() => markTopup(c.id)}><Check size={12} strokeWidth={2.5} /> Fyldt op i dag</button>
