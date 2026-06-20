@@ -389,6 +389,8 @@ export default function SomiCommand() {
   const [liveVideos, setLiveVideos] = useState([]); // produktions-kø fra videos-tabellen (read-only)
   const [qcLog, setQcLog] = useState([]);           // seneste QC-domme fra qc_log (read-only)
   const [analytics, setAnalytics] = useState(null); // winner-loop metrics (stats_daily) — KPI-stribe
+  const [queueRefresh, setQueueRefresh] = useState(0); // bump → IdeaQueueBoard genhenter n8n-køen
+  const [queueBusy, setQueueBusy] = useState(false);
 
   // ── Load ──
   useEffect(() => {
@@ -602,6 +604,30 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
     } finally { setAiBusy(false); }
   };
   const acceptIdea = (idea) => { addNamedIdea(channel.id, idea.name); setAiIdeas((prev) => prev.filter((x) => x !== idea)); };
+
+  // ── n8n-kø (Idé-kø-fanen er nu n8n-drevet) ──
+  // Skriver sager direkte i ideas-tabellen (status='proposed') + pusher til n8n,
+  // og beder IdeaQueueBoard om at genhente.
+  const pushIdeaToQueue = async (ideas, source) => {
+    setQueueBusy(true);
+    try {
+      const res = await fetch("/api/ideas", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ideas, source }),
+      });
+      if (res.ok) setQueueRefresh((n) => n + 1);
+      return res.ok;
+    } catch (e) { return false; } finally { setQueueBusy(false); }
+  };
+  const addCaseToQueue = async () => {
+    const name = newIdea.trim(); if (!name) return;
+    const ok = await pushIdeaToQueue([{ name }], "manuel");
+    if (ok) setNewIdea("");
+  };
+  const acceptIdeaToQueue = async (idea) => {
+    const ok = await pushIdeaToQueue([idea], "ai-forslag");
+    if (ok) setAiIdeas((prev) => prev.filter((x) => x !== idea));
+  };
 
   const exportData = () => {
     try {
@@ -1699,120 +1725,75 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "ko" && (
           <>
             <div className="sc-lede" style={{ marginTop: 28 }}>
-              Roadmap-overblik pr. kanal. Den <b>live</b> produktions-kø styres i n8n's ideas-tabel — det her er fugleperspektivet.
+              Idé-køen og produktionen — drevet direkte af n8n. Tilføj sager øverst, træk i køen for at styre
+              rækkefølgen, og se nederst hvad pipelinen faktisk har produceret (opdateres automatisk).
             </div>
 
-            <div className="sc-chan-row" style={{ marginBottom: 16 }}>
-              {channels.map((c) => (
-                <button key={c.id} className={`sc-pill static ${activeChan === c.id ? "ok" : "queued"}`}
-                  style={activeChan === c.id ? { borderColor: c.accent, color: c.accent } : {}}
-                  onClick={() => pickChannel(c.id)}>{c.name}</button>
-              ))}
+            {/* Ny sag → n8n-køen */}
+            <div className="sc-form" style={{ gridTemplateColumns: "1fr auto", display: "grid", gridAutoFlow: "column" }}>
+              <input className="sc-input" placeholder="Ny sag til køen…" value={newIdea}
+                onChange={(e) => setNewIdea(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCaseToQueue()} />
+              <button className="sc-btn primary" onClick={addCaseToQueue} disabled={queueBusy}>
+                {queueBusy ? <Loader2 size={13} className="sc-spin" /> : "Tilføj"}
+              </button>
             </div>
 
+            {/* AI-sagsforslag → n8n-køen */}
             {channel && (
-              <>
-                <div className="sc-form" style={{ gridTemplateColumns: "1fr auto", display: "grid", gridAutoFlow: "column" }}>
-                  <input className="sc-input" placeholder={`Ny sag til ${channel.name}…`} value={newIdea}
-                    onChange={(e) => setNewIdea(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addIdea(channel.id)} />
-                  <button className="sc-btn primary" onClick={() => addIdea(channel.id)}>Tilføj</button>
-                </div>
-
-                <div className="sc-ai">
-                  <div className="sc-ai-head">
-                    <div>
-                      <div className="sc-ai-title"><Wand2 size={14} /> AI-sagsforslag</div>
-                      <div className="sc-ai-sub">Claude foreslår nye, ikke-dækkede sager til {channel.name}s niche.</div>
-                    </div>
-                    <button className="sc-btn primary" onClick={generateIdeas} disabled={aiBusy}>
-                      {aiBusy ? <><Loader2 size={13} className="sc-spin" /> Henter…</> : <>Foreslå sager</>}
-                    </button>
+              <div className="sc-ai">
+                <div className="sc-ai-head">
+                  <div>
+                    <div className="sc-ai-title"><Wand2 size={14} /> AI-sagsforslag</div>
+                    <div className="sc-ai-sub">Claude foreslår nye, ikke-dækkede sager til nichen — tilføj dem direkte i køen.</div>
                   </div>
-                  {aiError && <div className="sc-ai-err">{aiError}</div>}
-                  {aiIdeas.length > 0 && (
-                    <div className="sc-ai-list">
-                      {aiIdeas.map((idea, i) => (
-                        <div className="sc-ai-card" key={i}>
-                          <div style={{ minWidth: 0 }}>
-                            <div className="sc-ai-name">{idea.name}</div>
-                            {idea.hook && <div className="sc-ai-hook">{idea.hook}</div>}
-                          </div>
-                          <button className="sc-topup" onClick={() => acceptIdea(idea)}><Plus size={13} /> Tilføj</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <button className="sc-btn primary" onClick={generateIdeas} disabled={aiBusy}>
+                    {aiBusy ? <><Loader2 size={13} className="sc-spin" /> Henter…</> : <>Foreslå sager</>}
+                  </button>
                 </div>
-
-                <IdeaQueueBoard />
-
-                {(() => {
-                  const queued = channel.queue.filter((q) => q.status !== "live");
-                  const liveItems = channel.queue.filter((q) => q.status === "live");
-                  const renderRow = (q, i) => (
-                    <div key={q.id} className="sc-step">
-                      <div className="sc-step-row">
-                        <span className="sc-sagnr" style={{ minWidth: 32, marginTop: 2 }}>{String(i + 1).padStart(2, "0")}</span>
-                        <div className="sc-step-body">
-                          <div className="sc-step-title">{q.name}</div>
+                {aiError && <div className="sc-ai-err">{aiError}</div>}
+                {aiIdeas.length > 0 && (
+                  <div className="sc-ai-list">
+                    {aiIdeas.map((idea, i) => (
+                      <div className="sc-ai-card" key={i}>
+                        <div style={{ minWidth: 0 }}>
+                          <div className="sc-ai-name">{idea.name}</div>
+                          {idea.hook && <div className="sc-ai-hook">{idea.hook}</div>}
                         </div>
-                        <button className={`sc-pill ${q.status}`} onClick={() => cycleCase(channel.id, q.id)} title="Klik for at skifte status">
-                          {CASE_STATUS[q.status]}
-                        </button>
-                        <button className="sc-guide-btn" onClick={() => removeIdea(channel.id, q.id)} aria-label="Fjern sag"><X size={15} /></button>
+                        <button className="sc-topup" onClick={() => acceptIdeaToQueue(idea)} disabled={queueBusy}><Plus size={13} /> Tilføj</button>
                       </div>
-                    </div>
-                  );
-                  return (
-                    <>
-                      <div className="sc-section-label" style={{ marginTop: 18 }}><Flag size={11} strokeWidth={2.4} /> Kø / planlagt</div>
-                      {queued.length === 0 ? (
-                        <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
-                          Ingen sager i kø. Tilføj en ovenfor — klik en sags status for at flytte den til Live.
-                        </div>
-                      ) : (
-                        <div className="sc-phase" style={{ marginTop: 4 }}>
-                          <div className="sc-steps" style={{ borderTop: "none" }}>{queued.map(renderRow)}</div>
-                        </div>
-                      )}
-
-                      <div className="sc-section-label" style={{ marginTop: 20 }}><Radio size={11} strokeWidth={2.4} /> Live / udgivet</div>
-                      {liveItems.length === 0 ? (
-                        <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
-                          Ingen live endnu. Sæt en sag i kø'en til <b>Live</b> (klik dens status), så rykker den herned.
-                        </div>
-                      ) : (
-                        <div className="sc-phase" style={{ marginTop: 4 }}>
-                          <div className="sc-steps" style={{ borderTop: "none" }}>{liveItems.map(renderRow)}</div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-
-                {liveVideos.filter((v) => v.channelId === channel.id).length > 0 && (
-                  <>
-                    <div className="sc-section-label" style={{ marginTop: 22 }}><Radio size={11} strokeWidth={2.4} /> Live produktion (n8n)</div>
-                    <div className="sc-lede" style={{ marginTop: 0, marginBottom: 8, fontSize: 12 }}>
-                      Direkte fra videos-tabellen — kun læsning. Statusserne styres af pipelinen.
-                    </div>
-                    <div className="sc-phase">
-                      <div className="sc-steps" style={{ borderTop: "none" }}>
-                        {liveVideos.filter((v) => v.channelId === channel.id).map((v) => (
-                          <div key={v.id} className="sc-step">
-                            <div className="sc-step-row">
-                              <div className="sc-step-body">
-                                <div className="sc-step-title">{v.case}</div>
-                              </div>
-                              <span className={"sc-pill static " + ({ producerer: "next", til_godkendelse: "queued", needs_review: "kritisk", uploadet_privat: "ok", published: "ok" }[v.status] || "")}>{v.label}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                    ))}
+                  </div>
                 )}
-              </>
+              </div>
+            )}
+
+            {/* Produktions-kø (n8n) — drag-reorder */}
+            <IdeaQueueBoard refreshKey={queueRefresh} />
+
+            {/* Live / udgivet — auto fra videos-tabellen (det MASTER har produceret) */}
+            <div className="sc-section-label" style={{ marginTop: 22 }}><Radio size={11} strokeWidth={2.4} /> Live / udgivet</div>
+            <div className="sc-lede" style={{ marginTop: 0, marginBottom: 8, fontSize: 12 }}>
+              Automatisk fra pipelinen (videos-tabellen) — det MASTER har produceret. Kun læsning; statusserne styres af pipelinen.
+            </div>
+            {liveVideos.length === 0 ? (
+              <div className="sc-alert-ok" style={{ color: "var(--bone-dim)", borderColor: "var(--line)" }}>
+                Ingen producerede videoer endnu. Når MASTER producerer en idé fra køen, dukker den op her af sig selv.
+              </div>
+            ) : (
+              <div className="sc-phase">
+                <div className="sc-steps" style={{ borderTop: "none" }}>
+                  {liveVideos.map((v) => (
+                    <div key={v.id} className="sc-step">
+                      <div className="sc-step-row">
+                        <div className="sc-step-body">
+                          <div className="sc-step-title">{v.case}</div>
+                        </div>
+                        <span className={"sc-pill static " + ({ producerer: "next", til_godkendelse: "queued", needs_review: "kritisk", uploadet_privat: "ok", published: "ok" }[v.status] || "")}>{v.label}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </>
         )}

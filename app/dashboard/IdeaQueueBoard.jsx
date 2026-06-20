@@ -12,7 +12,7 @@ const STATUS_LABEL = {
   ready: "Klar",
 };
 
-export default function IdeaQueueBoard() {
+export default function IdeaQueueBoard({ refreshKey = 0 }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,7 +30,7 @@ export default function IdeaQueueBoard() {
       setItems([]);
     } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [refreshKey]);
 
   const onDragStart = (i) => { dragIndex.current = i; };
   const onDragOver = (e, i) => {
