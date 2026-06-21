@@ -262,7 +262,7 @@ const ROADMAP = [
   { t: "Kadence-beslutning", d: "Behold daglig eller drop til 2/uge afhængigt af ElevenLabs-kvote og retention-signaler.", when: "Efter uge 1" },
   { t: "Dashboard (Fase 3)", d: "Port denne kommandocentral til Next.js + Supabase på Vercel. Daglig cron: YouTube Analytics → stats. Spejl data-felterne 1:1.", when: "Fase 3" },
   { t: "Kommentar-AI (Fase 4)", d: "Cron henter kommentarer → Haiku batch-klassificering → ugentlig niche-rapport → godkendte idéer tilbage i ideas. Lukket loop.", when: "Fase 4" },
-  { t: "Kanal 2: Engineering Disasters", d: "Klon pipelinen, skift kun stilguide + kø. Først når gate-kriterierne er grønne.", when: "Efter gate" },
+  { t: "Kanal 2 (research: Maritime Disasters)", d: "Niche-research peger på Maritime Disasters som bedst AI-egnet (ingen ægte vrag-footage → AI-billeder er native æstetik), foran Engineering Disasters (stadig stærk runner-up). Evt. paraply-brand 'history's greatest disasters & mysteries'. Klon pipelinen, skift stilguide + kø — først når gate er grøn.", when: "Efter gate" },
 ];
 
 const WATCH_ITEMS = [
