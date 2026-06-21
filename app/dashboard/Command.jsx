@@ -114,9 +114,12 @@ const SEED_DONE = [
   "f1s1","f1s2","f1s3","f1s4","f1s5","f1s6","f1s7","f1s8","f1s9","f1s10",
   "f2s1","f2s2","f2s3",
   "f3s1","f3s2", // Supabase-projekt+schema ✓ · Port til Next.js (live på Vercel) ✓
-  "f3s3",        // Cron: YouTube Analytics dagligt ✓ (OAuth+scopes verificeret end-to-end)
+  "f3s3",        // Cron: YouTube Analytics dagligt ✓ (2026-06-21: unique-constraints + selvhelende vindue, backfillet)
+  "f3s5",        // Revenue/Udvikling-view ✓ (2026-06-21: stats_daily/earnings live, profit + per-video scorecard)
+  "f4s3",        // Ugentlig niche-rapport ✓ (SOMI Edge: konkurrent+performance, auto søndag→mandag)
   "f4s4",        // Idé-feedback-loop ✓ (2026-06-20: winner-loop + research-agent → idé-køen)
   "f5s1","f5s2", // QC-agent (factcheck, shadow) ✓ · Trend-agent (TREND) ✓
+  "rm2","rm3",   // Roadmap: Kadence-beslutning ✓ (man/ons/fre) · Dashboard Fase 3 ✓ (live på Vercel)
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
@@ -262,7 +265,7 @@ const ROADMAP = [
 ];
 
 const WATCH_ITEMS = [
-  { t: "ElevenLabs-kvote ved daglig kadence", d: "Daglig brænder hurtigere end 2/uge-planen (~9 videoer/cyklus). Hold runway opdateret under Kreditter.", level: "amber" },
+  { t: "ElevenLabs-kvote", d: "Kadence: man/ons/fre long-form + ~1 short/dag. Hold runway opdateret under Kreditter — kontoen er løbet tør 2× før.", level: "amber" },
   { t: "qc_log skal fyldes før enforce", d: "Lad shadow-grenen samle rigtige domme og bekræft at den rammer korrekt, før QC flippes til enforce.", level: "neutral" },
   { t: "JAFCU i køen (anklage-stadie)", d: "Priority 14, formuleret 'allegedly'. QC flagger i shadow men stopper den ikke endnu. Overvej pause i ideas.", level: "amber" },
 ];
