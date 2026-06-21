@@ -371,6 +371,14 @@ function lighten(hex, amt) {
 
 export default function SomiCommand() {
   const [tab, setTab] = useState("overblik");
+  // Bevar aktiv fane på tværs af refresh via URL-hash (#fane-id).
+  useEffect(() => {
+    const h = (typeof window !== "undefined" ? window.location.hash : "").replace("#", "");
+    if (h && NAV.some((n) => n.id === h)) setTab(h);
+  }, []);
+  useEffect(() => {
+    try { window.history.replaceState(null, "", tab ? "#" + tab : " "); } catch (e) {}
+  }, [tab]);
   const [loaded, setLoaded] = useState(false);
   const [save, setSave] = useState(null);
 
