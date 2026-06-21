@@ -3,9 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-// Daglig cron (06:00 UTC, se vercel.json): henter YouTube Analytics for i går
-// og skriver pr. video → stats_daily + dagens samlede indtjening → earnings.
-// Skrives med service_role (cron har ingen bruger-session → RLS skal bypasses).
+// Daglig cron (06:00 UTC, se vercel.json): henter YouTube Analytics for et
+// rullende vindue (sidste 14 dage) pr. video pr. dag → stats_daily + daglig
+// samlet indtjening → earnings. Vinduet gør cronen selvhelende: et dags-hul
+// (f.eks. en fejlet kørsel) fyldes automatisk ved næste kørsel via idempotent
+// upsert. Skrives med service_role (cron har ingen bruger-session → RLS bypasses).
+const WINDOW_DAYS = 14;
 
 async function getAccessToken() {
   const r = await fetch("https://oauth2.googleapis.com/token", {
@@ -24,17 +27,27 @@ async function getAccessToken() {
   return j.access_token;
 }
 
-function buildReportUrl(token, ids, startDate, endDate, metrics) {
+// YouTube Analytics understøtter IKKE dimensions=video,day i samme kanal-query.
+// Vi henter derfor pr. dag (dimensions=video, start=end=dagen).
+function buildReportUrl(ids, day, metrics) {
   const params = new URLSearchParams({
     ids,
-    startDate,
-    endDate,
+    startDate: day,
+    endDate: day,
     metrics,
     dimensions: "video",
     sort: "-views",
     maxResults: "200",
   });
   return `https://youtubeanalytics.googleapis.com/v2/reports?${params.toString()}`;
+}
+
+function dayRange(startDate, endDate) {
+  const days = [];
+  for (let d = new Date(startDate); d <= new Date(endDate); d = new Date(d.getTime() + 86400000)) {
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
 }
 
 export async function GET(request) {
@@ -60,46 +73,63 @@ export async function GET(request) {
     const ids = process.env.YT_CHANNEL_ID
       ? `channel==${process.env.YT_CHANNEL_ID}`
       : "channel==MINE";
-    const date = new Date(Date.now() - 86400000).toISOString().slice(0, 10); // i går (UTC)
+    const endDate = new Date(Date.now() - 86400000).toISOString().slice(0, 10); // i går (UTC)
+    const startDate = new Date(Date.now() - WINDOW_DAYS * 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const days = dayRange(startDate, endDate);
 
-    // Forsøg med indtjening; fald tilbage uden hvis monetary-scope mangler.
+    const REV_METRICS = "views,estimatedMinutesWatched,subscribersGained,estimatedRevenue";
+    const BASE_METRICS = "views,estimatedMinutesWatched,subscribersGained";
+
+    // Indtjenings-scope afgøres på første dags-kald; falder tilbage uden hvis det mangler.
     let hasRevenue = true;
-    let yt = await fetch(
-      buildReportUrl(token, ids, date, date, "views,estimatedMinutesWatched,subscribersGained,estimatedRevenue"),
-      { headers: { authorization: `Bearer ${token}` } }
-    );
-    if (!yt.ok) {
-      const errText = await yt.text();
-      if (yt.status === 403 || /estimatedRevenue|scope|monet/i.test(errText)) {
-        hasRevenue = false;
-        yt = await fetch(
-          buildReportUrl(token, ids, date, date, "views,estimatedMinutesWatched,subscribersGained"),
-          { headers: { authorization: `Bearer ${token}` } }
-        );
-        if (!yt.ok) {
-          return NextResponse.json({ error: "yt: " + (await yt.text()) }, { status: 502 });
+    const stats = [];
+    const earningsRows = [];
+
+    for (const day of days) {
+      let yt = await fetch(buildReportUrl(ids, day, hasRevenue ? REV_METRICS : BASE_METRICS), {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!yt.ok && hasRevenue) {
+        const errText = await yt.text();
+        if (yt.status === 403 || /estimatedRevenue|scope|monet/i.test(errText)) {
+          hasRevenue = false; // skift permanent til base-metrics
+          yt = await fetch(buildReportUrl(ids, day, BASE_METRICS), {
+            headers: { authorization: `Bearer ${token}` },
+          });
         }
-      } else {
-        return NextResponse.json({ error: "yt: " + errText }, { status: 502 });
+      }
+      if (!yt.ok) {
+        return NextResponse.json({ error: `yt (${day}): ` + (await yt.text()) }, { status: 502 });
+      }
+
+      const rows = (await yt.json()).rows || [];
+      let dayRevenue = 0;
+      for (const row of rows) {
+        const [video_id, views, mins, subs] = row;
+        const revenue = hasRevenue ? Number(row[4]) || 0 : 0;
+        const v = Number(views) || 0;
+        dayRevenue += revenue;
+        stats.push({
+          video_id,
+          date: day,
+          views: v,
+          watch_time: Math.round(Number(mins) || 0),
+          subs: Number(subs) || 0,
+          rpm: v > 0 && hasRevenue ? Math.round((revenue / v) * 1000 * 100) / 100 : 0,
+        });
+      }
+      if (hasRevenue && rows.length) {
+        earningsRows.push({
+          channel_id: "ch1",
+          platform: "youtube",
+          date: day,
+          usd: Math.round(dayRevenue * 100) / 100,
+          source: "youtube_analytics",
+        });
       }
     }
-
-    const report = await yt.json();
-    const rows = report.rows || [];
-
-    const stats = rows.map((row) => {
-      const [video_id, views, mins, subs] = row;
-      const revenue = hasRevenue ? Number(row[4]) || 0 : 0;
-      const v = Number(views) || 0;
-      return {
-        video_id,
-        date,
-        views: v,
-        watch_time: Math.round(Number(mins) || 0),
-        subs: Number(subs) || 0,
-        rpm: v > 0 && hasRevenue ? Math.round((revenue / v) * 1000 * 100) / 100 : 0,
-      };
-    });
 
     const supabase = createAdminClient();
     let wroteStats = 0;
@@ -113,25 +143,17 @@ export async function GET(request) {
       wroteStats = stats.length;
     }
 
-    if (hasRevenue && rows.length) {
-      const totalRevenue = rows.reduce((s, r) => s + (Number(r[4]) || 0), 0);
-      const { error } = await supabase.from("earnings").upsert(
-        {
-          channel_id: "ch1",
-          platform: "youtube",
-          date,
-          usd: Math.round(totalRevenue * 100) / 100,
-          source: "youtube_analytics",
-        },
-        { onConflict: "channel_id,platform,date" }
-      );
+    if (earningsRows.length) {
+      const { error } = await supabase
+        .from("earnings")
+        .upsert(earningsRows, { onConflict: "channel_id,platform,date" });
       if (error) return NextResponse.json({ error: "earnings: " + error.message }, { status: 500 });
-      wroteEarnings = 1;
+      wroteEarnings = earningsRows.length;
     }
 
     return NextResponse.json({
       ok: true,
-      date,
+      window: { startDate, endDate },
       stats: wroteStats,
       earnings: wroteEarnings,
       revenue_included: hasRevenue,
