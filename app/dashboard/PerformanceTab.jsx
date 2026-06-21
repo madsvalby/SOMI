@@ -57,21 +57,44 @@ function ChartCard({ label, note, children }) {
 export default function PerformanceTab() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [note, setNote] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch("/api/performance");
-        if (r.ok) setData(await r.json());
-        else setErr(true);
-      } catch (e) { setErr(true); }
-    })();
-  }, []);
+  async function load() {
+    try {
+      const r = await fetch("/api/performance");
+      if (r.ok) setData(await r.json());
+      else setErr(true);
+    } catch (e) { setErr(true); }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function refresh() {
+    if (refreshing) return;
+    setRefreshing(true);
+    setNote("");
+    try {
+      const r = await fetch("/api/performance/refresh", { method: "POST" });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) {
+        await load();
+        setNote("opdateret " + new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }));
+      } else {
+        setNote("fejl: " + (j.error || r.status));
+      }
+    } catch (e) {
+      setNote("fejl: " + String(e.message || e));
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   if (err) return <div className="sc-lede">Kunne ikke hente performance-data.</div>;
   if (!data) return <div className="sc-lede">Henter udvikling…</div>;
 
   const { series = [], costByProvider = [], videos = [], totals = {}, subsPoints = 0 } = data;
+  const lastDate = series.length ? series[series.length - 1].date : null;
   const sd = series.map((s) => ({ ...s, d: dShort(s.date) }));
   const subsData = sd.filter((s) => s.subs != null);
   const viewsData = sd.filter((s) => s.views != null);
@@ -82,8 +105,22 @@ export default function PerformanceTab() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div className="sc-section-label" style={{ marginTop: 4 }}>
-        <TrendIcon /> Udvikling · kanalens performance over tid
+      <div className="sc-section-label" style={{ marginTop: 4, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <span><TrendIcon /> Udvikling · kanalens performance over tid</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 400 }}>
+          {lastDate && (
+            <span style={{ fontSize: 11, color: MUTE, textTransform: "none", letterSpacing: 0 }}>
+              Data pr. {dShort(lastDate)}{note ? " · " + note : ""}
+            </span>
+          )}
+          <button onClick={refresh} disabled={refreshing} title="Hent friske kanal-tal nu"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600,
+              padding: "5px 11px", borderRadius: 8, cursor: refreshing ? "default" : "pointer",
+              border: "1px solid var(--line, #E7E5DE)", background: "var(--panel, #fff)", color: INK,
+              opacity: refreshing ? 0.6 : 1, textTransform: "none", letterSpacing: 0 }}>
+            <RefreshIcon /> {refreshing ? "Opdaterer…" : "Opdater"}
+          </button>
+        </span>
       </div>
 
       {/* KPI-stribe */}
@@ -183,6 +220,16 @@ export default function PerformanceTab() {
         )}
       </div>
     </div>
+  );
+}
+
+function RefreshIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <polyline points="23 4 23 10 17 10" />
+      <polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
   );
 }
 

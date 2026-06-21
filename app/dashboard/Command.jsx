@@ -164,17 +164,18 @@ const SEED_CHANNELS = [
       { id: "c3", name: "FTX / SBF", status: "live" },
       { id: "c4", name: "Wirecard", status: "live" },
       { id: "c5", name: "Theranos", status: "live" },
-      { id: "c6", name: "Barings / Nick Leeson", status: "next" },
-      { id: "c7", name: "Archegos / Bill Hwang", status: "queued" },
-      { id: "c8", name: "OneCoin / Cryptoqueen", status: "queued" },
-      { id: "c9", name: "LTCM", status: "queued" },
-      { id: "c10", name: "Danske Bank / Estland", status: "queued" },
-      { id: "c11", name: "Andrew Left / Citron", status: "queued" },
-      { id: "c12", name: "Murrell", status: "queued" },
-      { id: "c13", name: "Easterday cattle-Ponzi", status: "queued" },
-      { id: "c14", name: "JAFCU", status: "queued" },
-      { id: "c15", name: "Toshiba", status: "queued" },
-      { id: "c16", name: "Boilermakers", status: "queued" },
+      { id: "c6", name: "Barings / Nick Leeson", status: "live" },
+      { id: "c7", name: "Archegos / Bill Hwang", status: "live" },
+      { id: "c8", name: "OneCoin / Cryptoqueen", status: "live" },
+      { id: "c9", name: "Andrew Tate", status: "next" },
+      { id: "c10", name: "First Brands", status: "queued" },
+      { id: "c11", name: "LTCM", status: "queued" },
+      { id: "c12", name: "Danske Bank / Estland", status: "queued" },
+      { id: "c13", name: "Andrew Left / Citron", status: "queued" },
+      { id: "c14", name: "Murrell", status: "queued" },
+      { id: "c15", name: "Easterday cattle-Ponzi", status: "queued" },
+      { id: "c16", name: "JAFCU", status: "queued" },
+      { id: "c17", name: "Toshiba", status: "queued" },
     ],
   },
   {
@@ -727,7 +728,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const grandNet = grandEarn - grandCost;
 
   return (
-    <div className="sc-root" style={{ "--gold": themeAccent, "--gold-bright": themeBright }}>
+    <div className="sc-root" style={{ "--gold": themeAccent, "--gold-bright": themeBright, zoom: 1.12 }}>
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
         .sc-root {
