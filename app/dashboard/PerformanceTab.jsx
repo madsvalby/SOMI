@@ -54,7 +54,7 @@ function ChartCard({ label, note, children }) {
   );
 }
 
-export default function PerformanceTab() {
+export default function PerformanceTab({ onRefreshed }) {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -79,6 +79,7 @@ export default function PerformanceTab() {
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
         await load();
+        if (onRefreshed) onRefreshed();   // hold Overblik i sync (samme kanal-tal)
         setNote("opdateret " + new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }));
       } else {
         setNote("fejl: " + (j.error || r.status));

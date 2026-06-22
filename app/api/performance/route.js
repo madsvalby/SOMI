@@ -9,7 +9,8 @@ function round2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 function providerOf(model) {
   const m = String(model || "").toLowerCase();
   if (m.includes("claude") || m.includes("sonnet") || m.includes("opus") || m.includes("anthropic")) return "Anthropic (script/QC)";
-  if (m.includes("eleven")) return "ElevenLabs (VO)";
+  if (m.includes("chatterbox") || m.includes("somi-tts")) return "TTS (self-host · $0)";
+  if (m.includes("eleven")) return "ElevenLabs (VO · udgået)";
   if (m.includes("gemini") || m.includes("nano")) return "Gemini (billeder)";
   if (m.includes("renderer")) return "Render-server";
   if (m.includes("youtube")) return "YouTube API";

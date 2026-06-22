@@ -60,7 +60,7 @@ const PHASES = [
     { id: "f0s2", title: "Opret YouTube brand-kanal", desc: "Brand-konto, ikke personlig.", guide: ["Indstillinger → opret ny kanal (brand-konto)", "Upload logo + banner, beskrivelse på engelsk", "Aktivér avancerede funktioner (>15 min upload)"] },
     { id: "f0s3", title: "Opret TikTok, Instagram og Facebook-side", desc: "Samme handle overalt.", guide: ["IG som Professionel, FB som Side (Graph API)", "Bio: én sætning + link-hub URL"] },
     { id: "f0s4", title: "Google Cloud + YouTube Data API", desc: "Fundament for upload og stats.", guide: ["Nyt projekt 'somi-engine'", "Aktivér YouTube Data API v3 + Analytics API", "OAuth-credentials i n8n Credentials"] },
-    { id: "f0s5", title: "ElevenLabs + lås stemmen", desc: "Én fast dokumentar-stemme.", guide: ["Test 3 kandidater på samme testscript", "Gem voice-ID som variabel", "Hold kreditter fyldt (se Kreditter)"] },
+    { id: "f0s5", title: "TTS-stemme (self-host clone)", desc: "Egen klonet dokumentar-stemme, lokal.", guide: ["Chatterbox-klon af egen stemme (ref.wav)", "Kører på render-serveren port 8090 — ingen credits", "cfg 0.3 + 1% mørkere + pauser"] },
     { id: "f0s6", title: "Render-løsning", desc: "Selv-hostet renderer + captions.", guide: ["VPS med renderer + Whisper.cpp captions", "API-nøgle gemt i n8n Credentials"] },
     { id: "f0s7", title: "Posting-løsning", desc: "FB kører via Graph API (gratis).", guide: ["Direkte Graph API til Facebook — ingen abonnement", "Buffer reserveret til shorts-only projekt"] },
     { id: "f0s8", title: "Data-tabeller: ideas / videos / costlog", desc: "Drifts-overblik i n8n.", guide: ["ideas: case_id, title, hook, source, status, priority", "videos: status-pipeline", "costlog: video_id, step, usd_cost, ts"] },
@@ -69,7 +69,7 @@ const PHASES = [
   { id: "f1", sag: "SAG 01", title: "Long-form pipeline", week: "Uge 1–3", steps: [
     { id: "f1s1", title: "Stilguide som system-prompt", desc: "Visuel stil + voice + struktur.", guide: ["Palette, motiver, 'aldrig rigtige personer', tone", "Prompt caching — prepend til alle kald"] },
     { id: "f1s2", title: "Workflow A: idé → script", desc: "Hele pakken i ét JSON-output.", guide: ["Cold open, 4 kapitler, billed-prompts, shorts-hooks, SEO", "Compliance: levende personer kun med kildetype", "Trigger: status 'klar til produktion'"] },
-    { id: "f1s3", title: "Workflow B: voiceover", desc: "ElevenLabs, kapitel-opdelt.", guide: ["Kapitel-opdeling gør retries billige", "mp3 i cloud storage, URL'er retur"] },
+    { id: "f1s3", title: "Workflow B: voiceover", desc: "Self-host TTS (Chatterbox-klon), kapitel-opdelt.", guide: ["Lokal generering på serveren — ingen credits/hæng", "Per-kapitel mp3-URL'er retur"] },
     { id: "f1s4", title: "Workflow C: billeder", desc: "20–30 billeder i 16:9.", guide: ["Stilguide + billed-prompt pr. kald", "2–3 reserve-billeder"] },
     { id: "f1s5", title: "Render-template (16:9)", desc: "Ken Burns, captions, musik, kapitelkort.", guide: ["Dynamiske felter: billed-URL'er, VO, titler", "3–4 faste musiktracks = lyd-identitet"] },
     { id: "f1s6", title: "Workflow D: assembly + render", desc: "JSON → færdig mp4.", guide: ["Poll til render er færdig", "Gem mp4-URL, status → 'til godkendelse'"] },
@@ -119,7 +119,7 @@ const SEED_DONE = [
   "f4s3",        // Ugentlig niche-rapport ✓ (SOMI Edge: konkurrent+performance, auto søndag→mandag)
   "f4s4",        // Idé-feedback-loop ✓ (2026-06-20: winner-loop + research-agent → idé-køen)
   "f5s1","f5s2", // QC-agent (factcheck, shadow) ✓ · Trend-agent (TREND) ✓
-  "rm2","rm3",   // Roadmap: Kadence-beslutning ✓ (man/ons/fre) · Dashboard Fase 3 ✓ (live på Vercel)
+  "rm2","rm3","rm6",   // Roadmap: Kadence ✓ · Dashboard Fase 3 ✓ · Self-host TTS ✓ (ElevenLabs erstattet jun. 2026)
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
@@ -149,13 +149,13 @@ const SEED_CHANNELS = [
       { name: "qc_log",  id: "3BoyrX2ZIdTeYMvw", desc: "case_id, title, verdict, overall, compliance, flags, ts" },
     ],
     refs: [
-      { k: "ElevenLabs voice-ID", v: "UmQN7jS1Ee8B1czsUtQh" },
-      { k: "ElevenLabs model", v: "eleven_multilingual_v2" },
+      { k: "TTS (self-host)", v: "Chatterbox · klonet egen stemme · port 8090" },
+      { k: "TTS-indstilling", v: "cfg 0.3 · 1% mørkere · pauser · ref.wav" },
       { k: "Billedmodel", v: "gemini-3.1-flash-image (Nano Banana 2)" },
       { k: "Script-model", v: "claude-sonnet-4-6" },
       { k: "Facebook Page-ID", v: "1117005634835655" },
       { k: "GCP-projekt", v: "ethereal-bison-499116-e2 (somi-engine)" },
-      { k: "Render-server", v: "212.147.240.185:8080" },
+      { k: "Render-server", v: "81.88.25.119:8080 (one.com L · 8 kerner)" },
       { k: "n8n-projekt", v: "C7PCi9TKnRc6Idan · UTC" },
     ],
     queue: [
@@ -189,9 +189,9 @@ const SEED_CHANNELS = [
 
 const CRED_ICON = { mic: Mic, cpu: Cpu, image: ImageIcon, server: Server, radio: Radio };
 const SEED_CREDITS = [
-  { id: "elevenlabs", name: "ElevenLabs", kind: "Kreditter · stemme", icon: "mic",
-    url: "https://elevenlabs.io/app/usage", burn: "~14k tegn/video (long-form + 3 shorts)",
-    note: "Plan ~131k tegn/md. Løb tør 2× — hold den fyldt.", status: "lav",
+  { id: "tts", name: "TTS · self-host (Chatterbox)", kind: "Lokal · stemme (gratis)", icon: "mic",
+    url: "", burn: "$0 — kører lokalt på render-serveren",
+    note: "Klonet egen stemme. Erstattede ElevenLabs (jun. 2026) → ingen credits, ingen kvote, ingen hæng.", status: "ok",
     balance: "", lastTopup: "", runwayChars: "" },
   { id: "anthropic", name: "Anthropic · Claude", kind: "API · scripts", icon: "cpu",
     url: "https://console.anthropic.com/settings/billing", burn: "~$0,30/video",
@@ -202,9 +202,9 @@ const SEED_CREDITS = [
   { id: "n8n", name: "n8n Cloud", kind: "Abonnement · orkestrering", icon: "server",
     url: "https://app.n8n.cloud", burn: "Fast md.-pris",
     note: "Kører hele pipelinen. Alt stopper hvis kontoen lukker.", status: "ok", balance: "", lastTopup: "" },
-  { id: "render", name: "Render-server (VPS)", kind: "Server · 212.147.240.185", icon: "server",
+  { id: "render", name: "Render-server (VPS)", kind: "Server · 81.88.25.119 (one.com L)", icon: "server",
     url: "", burn: "Fast md.-pris (hosting)",
-    note: "Selv-hostet renderer + Whisper-captions. Betal VPS-regningen.", status: "ok", balance: "", lastTopup: "" },
+    note: "Selv-hostet renderer + Whisper-captions + Chatterbox-TTS. 8 kerner/16GB/400GB.", status: "ok", balance: "", lastTopup: "" },
   { id: "buffer", name: "Buffer", kind: "Abonnement · valgfri", icon: "radio",
     url: "https://publish.buffer.com/settings/billing", burn: "Gratis op til 3 kanaler",
     note: "Reserve til shorts-only projekt. FB kører gratis via Graph API nu.", status: "ok", balance: "", lastTopup: "" },
@@ -218,7 +218,8 @@ const LINK_GROUPS = [
     { label: "n8n hjem", url: "https://madsvalby.app.n8n.cloud" },
   ]},
   { title: "Render", links: [
-    { label: "Server health", url: "http://212.147.240.185:8080/health" },
+    { label: "Server health", url: "http://81.88.25.119:8080/health" },
+    { label: "TTS health", url: "http://81.88.25.119:8090/health" },
   ]},
   { title: "Udgivelse", links: [
     { label: "YouTube Studio", url: "https://studio.youtube.com" },
@@ -226,7 +227,6 @@ const LINK_GROUPS = [
     { label: "Google Drive", url: "https://drive.google.com" },
   ]},
   { title: "AI & kreditter", links: [
-    { label: "ElevenLabs forbrug", url: "https://elevenlabs.io/app/usage" },
     { label: "Anthropic console", url: "https://console.anthropic.com" },
     { label: "Google AI Studio", url: "https://aistudio.google.com" },
     { label: "Google Cloud billing", url: "https://console.cloud.google.com/billing" },
@@ -259,14 +259,14 @@ const EARN_LABEL = Object.fromEntries(EARN_SOURCES.map((s) => [s.id, s.label]));
 const ROADMAP = [
   { t: "QC enforce-flip", d: "Lad QC-dommen gate hovedflowet: reject ⇒ videos.status='needs_review' + spring publicering over, i stedet for passiv shadow-log.", when: "Efter launch-ugen" },
   { t: "JAFCU-håndtering", d: "Pause i ideas indtil enforce er på, eller lad QC fange den når enforce er live. Lander ~9 dage ude ved daglig kadence.", when: "Knyttet til enforce" },
-  { t: "Kadence-beslutning", d: "Behold daglig eller drop til 2/uge afhængigt af ElevenLabs-kvote og retention-signaler.", when: "Efter uge 1" },
+  { t: "Kadence-beslutning", d: "Behold daglig eller drop til 2/uge afhængigt af retention-signaler. TTS er nu self-host (ingen kvote-begrænsning).", when: "Efter uge 1" },
   { t: "Dashboard (Fase 3)", d: "Port denne kommandocentral til Next.js + Supabase på Vercel. Daglig cron: YouTube Analytics → stats. Spejl data-felterne 1:1.", when: "Fase 3" },
   { t: "Kommentar-AI (Fase 4)", d: "Cron henter kommentarer → Haiku batch-klassificering → ugentlig niche-rapport → godkendte idéer tilbage i ideas. Lukket loop.", when: "Fase 4" },
   { t: "Kanal 2 (research: Maritime Disasters)", d: "Niche-research peger på Maritime Disasters som bedst AI-egnet (ingen ægte vrag-footage → AI-billeder er native æstetik), foran Engineering Disasters (stadig stærk runner-up). Evt. paraply-brand 'history's greatest disasters & mysteries'. Klon pipelinen, skift stilguide + kø — først når gate er grøn.", when: "Efter gate" },
+  { t: "Self-host TTS", d: "ElevenLabs erstattet af lokal Chatterbox-stemmeklon på render-serveren (jun. 2026) — nul credits, ingen kvote-stop, ingen hæng. Egen klonet stemme bevaret (cfg 0.3 + 1% mørkere).", when: "Gennemført ✓" },
 ];
 
 const WATCH_ITEMS = [
-  { t: "ElevenLabs-kvote", d: "Kadence: man/ons/fre long-form + ~1 short/dag. Hold runway opdateret under Kreditter — kontoen er løbet tør 2× før.", level: "amber" },
   { t: "qc_log skal fyldes før enforce", d: "Lad shadow-grenen samle rigtige domme og bekræft at den rammer korrekt, før QC flippes til enforce.", level: "neutral" },
   { t: "JAFCU i køen (anklage-stadie)", d: "Priority 14, formuleret 'allegedly'. QC flagger i shadow men stopper den ikke endnu. Overvej pause i ideas.", level: "amber" },
 ];
@@ -481,6 +481,19 @@ export default function SomiCommand() {
       setLoaded(true);
     })();
   }, []);
+
+  // Genhent kanal-totaler til Overblik (kaldes også af Udvikling-fanens Opdater,
+  // så Overblik og Udvikling viser samme friske tal).
+  async function refreshChannelStats() {
+    try {
+      const cres = await fetch("/api/competitors");
+      if (cres.ok) {
+        const cj = await cres.json();
+        const self = (cj.competitors || []).find((c) => c.isSelf);
+        setChannelStats({ yt: self ? { videos: self.videos, views: self.views, subs: self.subs } : null, fb: null });
+      }
+    } catch (e) { /* ignore */ }
+  }
 
   // ── Tastatur: 1–6 skifter fane ──
   useEffect(() => {
@@ -708,6 +721,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const monthlyChars = Math.round(cadence * 4.33 * 14000);
   const planPct = Math.round((monthlyChars / 131000) * 100);
   const monthlyUsd = Math.round(cadence * 4.33 * 8);
+  const ttsSavedMo = monthlyUsd; // self-host TTS: sparet pr. md vs ElevenLabs (nu $0)
   const gateDone = GATE.filter((_, i) => done.has("gate" + i)).length;
   const rmDone = ROADMAP.filter((_, i) => done.has("rm" + i)).length;
   const qcrDone = QC_READY.filter((_, i) => done.has("qcr" + i)).length;
@@ -1121,7 +1135,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "agenter" && <AgentsTab />}
 
         {/* ───────── UDVIKLING ───────── */}
-        {tab === "udvikling" && <PerformanceTab />}
+        {tab === "udvikling" && <PerformanceTab onRefreshed={refreshChannelStats} />}
 
         {/* ───────── RAPPORTER ───────── */}
         {tab === "rapporter" && <ReportsTab />}
@@ -1626,9 +1640,9 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </div>
 
             <div className="sc-cred-bar">
-              <div className="blk"><span className="v">~$8</span><span className="l">Pr. video (est.)</span></div>
-              <div className="blk"><span className="v">${monthlyUsd}</span><span className="l">Pr. md. ved {cadence}/uge</span></div>
-              <div className="blk"><span className="v" style={{ color: planPct > 100 ? "var(--rust)" : planPct > 80 ? "var(--amber)" : "var(--green)" }}>{planPct}%</span><span className="l">Af ElevenLabs-plan</span></div>
+              <div className="blk"><span className="v">~$3</span><span className="l">Pr. video (est.)</span></div>
+              <div className="blk"><span className="v">${Math.round(cadence * 4.33 * 3)}</span><span className="l">Pr. md. ved {cadence}/uge</span></div>
+              <div className="blk"><span className="v" style={{ color: "var(--green)" }}>$0</span><span className="l">TTS self-host · sparer ${ttsSavedMo}/md</span></div>
               <div className="sc-cad">
                 <span>Kadence</span>
                 <input type="number" min="0" value={cadence} onChange={(e) => setCad(e.target.value)} aria-label="Videoer pr. uge" />
@@ -1661,29 +1675,13 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                   <div className="sc-cred-note">{c.note}</div>
                   <div className="sc-cred-burn">⛽ {c.burn}</div>
 
-                  {c.id === "elevenlabs" && (() => {
-                    const live = ((creditWatch && creditWatch.items) || []).find((x) => x.platform === "elevenlabs");
-                    const liveRemain = live && live.total != null && live.used != null ? Math.max(0, Number(live.total) - Number(live.used)) : null;
-                    if (liveRemain != null) {
-                      const lv = Math.floor(liveRemain / 14000);
-                      return (
-                        <div className="sc-runway">
-                          <span className="out" style={{ fontSize: 12.5 }}>
-                            <b style={{ color: "var(--gold)" }}>Live</b> · {liveRemain.toLocaleString("da-DK")} tegn ({live.remainingPct}%) · ≈ <b>{lv}</b> videoer
-                          </span>
-                        </div>
-                      );
-                    }
-                    return (
-                      <div className="sc-runway">
-                        <input type="number" placeholder="Resterende tegn" value={c.runwayChars}
-                          onChange={(e) => patchCredit(c.id, { runwayChars: e.target.value })} aria-label="Resterende tegn" />
-                        <span className="out">{videosLeft != null
-                          ? <>≈ <b>{videosLeft}</b> videoer tilbage</>
-                          : <span style={{ color: "var(--bone-faint)" }}>indtast saldo → runway</span>}</span>
-                      </div>
-                    );
-                  })()}
+                  {c.id === "tts" && (
+                    <div className="sc-runway">
+                      <span className="out" style={{ fontSize: 12.5 }}>
+                        <b style={{ color: "var(--green)" }}>Lokal · $0</b> · Chatterbox-klon på render-serveren · sparer ~${ttsSavedMo}/md vs ElevenLabs · ingen kvote/hæng
+                      </span>
+                    </div>
+                  )}
 
                   {c.id === "gemini" && (() => {
                     const rate = 6.9; // ca. DKK pr. USD
