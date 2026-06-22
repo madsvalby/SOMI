@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { SELF_HANDLE } from "@/lib/competitors";
 
 export const dynamic = "force-dynamic";
 
@@ -25,13 +26,14 @@ export async function POST() {
   }
 
   try {
-    const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${encodeURIComponent(channelId)}&key=${key}`;
+    const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${encodeURIComponent(channelId)}&key=${key}`;
     const r = await fetch(url);
     if (!r.ok) return NextResponse.json({ error: "yt: " + (await r.text()) }, { status: 502 });
     const j = await r.json();
     const c = (j.items || [])[0];
     if (!c) return NextResponse.json({ error: "kanal ikke fundet" }, { status: 404 });
     const s = c.statistics || {};
+    const name = (c.snippet && c.snippet.title) || "Paper Empires";
     const subs = s.hiddenSubscriberCount ? null : Number(s.subscriberCount) || 0;
     const views = Number(s.viewCount) || 0;
     const videos = Number(s.videoCount) || 0;
@@ -48,6 +50,14 @@ export async function POST() {
     const snap = { date: today, subs, views, videos, cost_usd: costToday };
     const { error } = await admin.from("channel_daily").upsert(snap, { onConflict: "date" });
     if (error) return NextResponse.json({ error: "channel_daily: " + error.message }, { status: 500 });
+
+    // Hold også Overblik (competitors self-række) i sync — ellers læser Overblik
+    // og Udvikling to forskellige tabeller og Overblik bliver hængende indtil den
+    // daglige competitors-cron kører. Best-effort: bryder ikke channel_daily-svaret.
+    await admin.from("competitors").upsert(
+      { handle: SELF_HANDLE, name, channel_id: channelId, subs, views, videos, is_self: true, updated_at: now },
+      { onConflict: "handle" }
+    );
 
     return NextResponse.json({ ok: true, refreshedAt: now, snapshot: { date: today, subs, views, videos } });
   } catch (e) {
