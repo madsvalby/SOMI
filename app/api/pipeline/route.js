@@ -14,7 +14,7 @@ export async function GET() {
 
   const [videosR, costR, earnR, qcR] = await Promise.all([
     supabase.from("videos").select("video_id,case_id,title,status,channel_id,created_at"),
-    supabase.from("costlog").select("video_id,usd_cost"),
+    supabase.from("costlog").select("video_id,usd_cost,model"),
     supabase.from("earnings").select("channel_id,platform,date,usd"),
     supabase.from("qc_log").select("id,case_id,title,verdict,overall,compliance,flags,ts"),
   ]);
@@ -28,6 +28,7 @@ export async function GET() {
   // costs: aggreger costlog pr. video → én linje pr. sag i shapen {id, channelId, case, usd}
   const byVideo = {};
   (costR.data || []).forEach((c) => {
+    if (String(c.model || "").toLowerCase().includes("eleven")) return; // udgået ElevenLabs — ekskludér
     const key = c.video_id || "ukendt";
     if (!byVideo[key]) {
       const v = vmap[c.video_id];

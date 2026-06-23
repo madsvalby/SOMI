@@ -41,6 +41,7 @@ export async function GET() {
   const byVideoCost = {};
   let totalSpend = 0;
   costlog.forEach((c) => {
+    if (String(c.model || "").toLowerCase().includes("eleven")) return; // udgået ElevenLabs — ekskludér fra omkostnings-visning
     const usd = Number(c.usd_cost) || 0;
     totalSpend += usd;
     const p = providerOf(c.model);
