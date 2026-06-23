@@ -27,7 +27,7 @@ export async function GET(request) {
   try {
     const [statsR, videosR] = await Promise.all([
       admin.from("stats_daily").select("video_id,date,views,watch_time,subs,rpm"),
-      admin.from("videos").select("video_id,case_id,title,status,channel_id,created_at"),
+      admin.from("videos").select("video_id,case_id,title,status,channel_id,created_at,urls"),
     ]);
 
     const loop = computeWinnerLoop({ stats: statsR.data || [], videos: videosR.data || [] });

@@ -50,9 +50,9 @@ export default function TodaysMission({ analytics, liveVideos = [], onGoto }) {
   const wl = analytics?.watchlist?.[0];
   if (wl) {
     missions.push({
-      icon: TrendingDown, tone: "var(--rust)", goto: "ko",
+      icon: TrendingDown, tone: "var(--rust)", goto: "agenter",
       text: `Test ny titel + thumbnail på "${wl.title}"`,
-      detail: "Underperformer — en ompakning kan vække den.",
+      detail: "Underperformer — se doktorens diagnose + nye titel/thumbnail-forslag.",
     });
   }
 

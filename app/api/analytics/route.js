@@ -17,7 +17,7 @@ export async function GET() {
 
   const [statsR, videosR] = await Promise.all([
     supabase.from("stats_daily").select("video_id,date,views,watch_time,subs,rpm"),
-    supabase.from("videos").select("video_id,case_id,title,status,channel_id,created_at"),
+    supabase.from("videos").select("video_id,case_id,title,status,channel_id,created_at,urls"),
   ]);
 
   const result = computeWinnerLoop({
