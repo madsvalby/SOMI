@@ -85,8 +85,6 @@ const PHASES = [
     { id: "f2s1", title: "Shorts-klipper workflow", desc: "3 stærkeste hooks fra scriptet.", guide: ["Hooks ligger i scriptets JSON", "Slut på vendepunktet → 'full story on the channel'"] },
     { id: "f2s2", title: "9:16 render-template", desc: "Store captions, hook først, outro.", guide: ["Genbrug billeder i 9:16-crop", "Læsbar uden lyd (80% ser uden lyd)"] },
     { id: "f2s3", title: "Multi-platform posting", desc: "YT Shorts + Facebook (Graph API).", guide: ["Platform-tilpasset caption pr. kanal", "TikTok/IG reserveret til shorts-only projekt"] },
-    { id: "f2s4", title: "Link-hub på Vercel", desc: "Egen side med kort-links — du ejer data.", guide: ["dinside.com/p/produkt → referral-link", "UTM pr. video og platform"] },
-    { id: "f2s5", title: "Klik-logging i Supabase", desc: "Hver redirect logges.", guide: ["Tabel 'clicks': slug, video_id, platform, ts", "Rygraden i revenue-viewet"] },
   ]},
   { id: "f3", sag: "SAG 03", title: "Dashboard", week: "Uge 4–5", steps: [
     { id: "f3s1", title: "Supabase-projekt + schema", desc: "videos, posts, stats_daily, costs, clicks.", guide: ["Spejl data-felterne 1:1 → triviel migrering"] },
@@ -105,7 +103,6 @@ const PHASES = [
     { id: "f5s1", title: "QC-agent", desc: "Scorer script + metadata mod rubric.", guide: ["Hook, fakta-kilder, struktur, SEO, compliance", "Self-healing: under tærskel = regenerér"] },
     { id: "f5s2", title: "Trend-agent", desc: "Scanner finansnyheder → idé-køen.", guide: ["Konstant story-feed = næsten gratis idéer"] },
     { id: "f5s3", title: "30 dages autopilot", desc: "Kører uden indgriben, kun stikprøver.", guide: ["Gate-kriterierne skal alle være grønne"] },
-    { id: "f5s4", title: "Kanal 2: Engineering Disasters", desc: "Klon pipelinen, skift stilguide.", guide: ["Din byggeplads-viden er din edge"] },
   ]},
 ];
 const ALL_STEPS = PHASES.flatMap((p) => p.steps.map((s) => ({ ...s, phaseId: p.id })));
