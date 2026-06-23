@@ -6,7 +6,7 @@ import {
   Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap, CircleDot, Lock,
   Wand2, Download, Loader2, TrendingUp, Coins, Activity,
   Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge,
-  Megaphone, MessageSquare, Pin, Facebook, Bot, FileText
+  Megaphone, MessageSquare, Pin, Facebook, Bot, FileText, Sun, Moon
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
 import PerformanceTab from "./PerformanceTab";
@@ -414,6 +414,7 @@ export default function SomiCommand() {
   const [econChan, setEconChan] = useState("all");
   const [pipelineAuto, setPipelineAuto] = useState(false);
   const [liveVideos, setLiveVideos] = useState([]); // produktions-kø fra videos-tabellen (read-only)
+  const [dark, setDark] = useState(false); // mørkt tema (gemmes i localStorage)
   const [qcLog, setQcLog] = useState([]);           // seneste QC-domme fra qc_log (read-only)
   const [analytics, setAnalytics] = useState(null); // winner-loop metrics (stats_daily) — KPI-stribe
   const [creditWatch, setCreditWatch] = useState(null); // live credit/budget-status (n8n CREDIT WATCH) — advarsels-banner
@@ -424,6 +425,7 @@ export default function SomiCommand() {
 
   // ── Load ──
   useEffect(() => {
+    try { if (localStorage.getItem("somi_theme") === "dark") setDark(true); } catch (e) {}
     (async () => {
       const [d, ch, cr, ca, kp, lg, ac, co, ea] = await Promise.all([
         loadKey(K_CHECK, null), loadKey(K_CHAN, null), loadKey(K_CRED, null),
@@ -771,8 +773,14 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const grandCost = sum(costs);
   const grandNet = grandEarn - grandCost;
 
+  const toggleTheme = () => setDark((d) => {
+    const nd = !d;
+    try { localStorage.setItem("somi_theme", nd ? "dark" : "light"); } catch (e) {}
+    return nd;
+  });
+
   return (
-    <div className="sc-root" style={{ "--gold": themeAccent, "--gold-bright": themeBright, zoom: 1.12 }}>
+    <div className={"sc-root" + (dark ? " sc-dark" : "")} style={{ "--gold": themeAccent, "--gold-bright": themeBright, zoom: 1.12 }}>
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
         .sc-root {
@@ -785,6 +793,14 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
           --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
           min-height:100vh; background:var(--bg); color:var(--bone); font-family:var(--sans); -webkit-font-smoothing:antialiased;
         }
+        /* Dark mode — warm charcoal near-black, guld popper (WCAG-verificeret). Spejler samme variabel-navne. */
+        .sc-root.sc-dark {
+          --bg:#0C0B09; --panel:#15140F; --panel2:#1C1A14; --field:#211E16;
+          --line:rgba(255,250,240,0.10); --line-soft:rgba(255,250,240,0.055);
+          --ink:#F4F0E7; --num:#F8F4EB;
+          --bone:#E4DDCF; --bone-dim:#ABA493; --bone-faint:#7E776A;
+          --green:#54C079; --rust:#E0734E; --amber:#E0A53F;
+        }
         .sc-shell { max-width:1600px; margin:0 auto; padding:0 40px 90px; }
         .sc-root *::selection { background:rgba(201,161,78,0.3); }
 
@@ -794,6 +810,10 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-mast-meta { font-family:var(--mono); font-size:11px; color:var(--bone-faint); letter-spacing:0.1em; text-align:right; }
         .sc-mast-meta b { color:var(--bone-dim); font-weight:500; }
         .sc-save { display:inline-flex; align-items:center; gap:6px; color:var(--green); }
+        .sc-theme-toggle { display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; letter-spacing:0.06em;
+          text-transform:uppercase; color:var(--bone-dim); background:var(--field); border:1px solid var(--line); border-radius:8px;
+          padding:6px 10px; cursor:pointer; transition:color .14s, border-color .14s; }
+        .sc-theme-toggle:hover { color:var(--gold); border-color:var(--gold); }
 
         .sc-nav { display:flex; flex-wrap:wrap; gap:4px; margin-top:24px; border-bottom:1px solid var(--line); }
         .sc-tab { font-family:var(--mono); font-size:12px; letter-spacing:0.06em; padding:11px 13px 13px; background:none; border:none;
@@ -1100,6 +1120,10 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </h1>
           </div>
           <div className="sc-mast-meta">
+            <button className="sc-theme-toggle" onClick={toggleTheme} aria-label="Skift tema"
+              title={dark ? "Skift til lyst tema" : "Skift til mørkt tema"} style={{ marginBottom: 8 }}>
+              {dark ? <Sun size={13} /> : <Moon size={13} />} {dark ? "Lyst" : "Mørkt"}
+            </button>
             {save === "saved"
               ? <span className="sc-save"><Check size={12} strokeWidth={3} /> Gemt</span>
               : <span><b>{liveChannels}</b> kanal{liveChannels === 1 ? "" : "er"} live · <b>{pct}%</b> bygget</span>}

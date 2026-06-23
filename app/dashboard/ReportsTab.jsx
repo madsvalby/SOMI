@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-const INK = "#23252B";
-const MUTE = "#8C8F98";
-const GOLD = "#C9A14E";
+const INK = "var(--ink)";
+const MUTE = "var(--bone-dim)";
+const GOLD = "var(--gold)";
 const LINE = "var(--line, #E7E5DE)";
 
 // Inline **fed** → <strong>

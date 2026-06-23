@@ -6,10 +6,10 @@ import {
 } from "recharts";
 
 // Farver afstemt med temaet (guld-accent, dæmpet)
-const GOLD = "#C9A14E";
-const INK = "#23252B";
-const MUTE = "#8C8F98";
-const GRID = "#ECEAE3";
+const GOLD = "var(--gold)";
+const INK = "var(--ink)";
+const MUTE = "var(--bone-dim)";
+const GRID = "var(--line)";
 const TEAL = "#3E7C7B";
 const BLUE = "#4A6FA5";
 const RUST = "#C9392E";
@@ -40,7 +40,7 @@ function card(children, style) {
   );
 }
 
-const tooltipStyle = { background: "#fff", border: "1px solid " + GRID, borderRadius: 8, fontSize: 12, color: INK, boxShadow: "0 4px 14px rgba(0,0,0,0.08)" };
+const tooltipStyle = { background: "var(--panel)", border: "1px solid " + GRID, borderRadius: 8, fontSize: 12, color: INK, boxShadow: "0 4px 14px rgba(0,0,0,0.08)" };
 
 function ChartCard({ label, note, children }) {
   return card(
