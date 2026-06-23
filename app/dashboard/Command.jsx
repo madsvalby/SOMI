@@ -12,6 +12,7 @@ import AgentsTab from "./AgentsTab";
 import PerformanceTab from "./PerformanceTab";
 import ReportsTab from "./ReportsTab";
 import ImperiumTab from "./ImperiumTab";
+import CompanyRoadmaps from "./CompanyRoadmaps";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
@@ -137,7 +138,7 @@ const SEED_CHANNELS = [
     ytStudio: "https://studio.youtube.com",
     fb: "https://www.facebook.com/1117005634835655",
     qcMode: "shadow", jafcuPaused: false,
-    renderHealth: "http://212.147.240.185:8080/health",
+    renderHealth: "http://81.88.25.119:8080/health",
     systems: [
       { key: "master", label: "MASTER", id: "LvTDjTb8MxEeOJM3", role: "Idé → færdig long-form, upload YT+FB, kalder SHORTS", trigger: "Manuel + daglig 06:00 UTC", nodes: "~52" },
       { key: "shorts", label: "SHORTS", id: "98Jel2bOtd2zDGob", role: "3 shorts fra scriptet, render 9:16, upload YT+FB", trigger: "Kaldes af MASTER", nodes: "16" },
@@ -322,6 +323,7 @@ const NAV_GROUPS = [
   ] },
   { label: "Imperiet", tabs: [
     { id: "kommende", label: "Kommende projekter", Icon: Rocket },
+    { id: "roadmaps", label: "Roadmaps", Icon: Milestone },
     { id: "eksempler", label: "Eksempler", Icon: Sparkles },
   ] },
 ];
@@ -430,7 +432,20 @@ export default function SomiCommand() {
       ]);
       if (d && Array.isArray(d.done)) setDone(new Set(d.done));
       if (Array.isArray(ch) && ch.length) setChannels(ch);
-      if (Array.isArray(cr) && cr.length) setCredits(cr);
+      if (Array.isArray(cr) && cr.length) {
+        // Flet gemt state ind i den aktuelle SEED_CREDITS: behold brugerens dynamiske
+        // felter (status/saldo/top-up), men tag statisk tekst fra koden og DROP ukendte
+        // id'er (fx udgået "elevenlabs") så pensionerede konti ikke spøger fra gammel KV.
+        const saved = Object.fromEntries(cr.map((c) => [c.id, c]));
+        setCredits(SEED_CREDITS.map((s) => {
+          const v = saved[s.id]; if (!v) return s;
+          const dyn = {};
+          for (const k of ["status", "balance", "lastTopup", "geminiBalance", "geminiBalanceDate"]) {
+            if (v[k] !== undefined && v[k] !== null && v[k] !== "") dyn[k] = v[k];
+          }
+          return { ...s, ...dyn };
+        }));
+      }
       if (typeof ca === "number") setCadence(ca);
       if (kp && typeof kp === "object") setKpis({ videos: "", views: "", subs: "", ...kp });
       if (Array.isArray(lg)) setLog(lg);
@@ -1147,8 +1162,9 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {/* ───────── RAPPORTER ───────── */}
         {tab === "rapporter" && <ReportsTab />}
 
-        {/* ───────── KOMMENDE PROJEKTER / EKSEMPLER ───────── */}
+        {/* ───────── KOMMENDE PROJEKTER / ROADMAPS / EKSEMPLER ───────── */}
         {tab === "kommende" && <ImperiumTab view="plans" />}
+        {tab === "roadmaps" && <CompanyRoadmaps />}
         {tab === "eksempler" && <ImperiumTab view="examples" />}
 
         {/* ───────── OVERBLIK ───────── */}
@@ -1476,7 +1492,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                     <div className="sc-sys-main">
                       <div className="sc-sys-name">SELV-HOSTET VPS</div>
                       <div className="sc-sys-role">Renderer + Whisper-captions. Deploy: scp server.js → systemctl restart somi-renderer.</div>
-                      <div className="sc-sys-meta"><span>212.147.240.185:8080</span><span>systemd: somi-renderer</span></div>
+                      <div className="sc-sys-meta"><span>81.88.25.119:8080</span><span>systemd: somi-renderer</span></div>
                     </div>
                     <div className="sc-sys-actions">
                       {channel.renderHealth && <a className="sc-link ghost" href={channel.renderHealth} target="_blank" rel="noopener noreferrer">Health <ExternalLink size={12} /></a>}
