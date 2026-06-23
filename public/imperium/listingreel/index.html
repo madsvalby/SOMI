@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!-- VERTICAL MICRO-SAAS: real-estate listing video — landingsside (MVP). Nat-build 2026-06-23. Brand "ListingReel" = placeholder.
+     Lead-form POSTer til live foundry-order edge-funktion. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ListingReel — Every listing becomes a video. Automatically.</title>
+  <meta name="description" content="Turn any property listing into a narrated, branded walkthrough video — in minutes, automatically. Built for real-estate agents. From $49/mo." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#0B0F14',panel:'#11171F',line:'#1E2730',gold:'#C9A14E',goldlt:'#E6C877',bone:'#F2F2EA',dim:'#9AA6B2'},fontFamily:{serif:['Fraunces','serif'],sans:['Inter','sans-serif']}}}};
+    window.LEAD_ENDPOINT="https://ihmgmpuptlmxokdmdirm.supabase.co/functions/v1/foundry-order";</script>
+  <style>html{scroll-behavior:smooth}body{background:#0B0F14}.grad{background:radial-gradient(900px 500px at 70% -10%,rgba(201,161,78,.16),transparent 60%)}.card{background:#11171F;border:1px solid #1E2730}</style>
+</head>
+<body class="font-sans text-bone antialiased">
+  <header class="sticky top-0 z-30 backdrop-blur bg-ink/80 border-b border-line"><div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+    <span class="text-gold font-serif text-xl font-700">ListingReel</span>
+    <nav class="hidden md:flex gap-7 text-sm text-dim"><a href="#how" class="hover:text-bone">How it works</a><a href="#why" class="hover:text-bone">Why agents love it</a><a href="#pricing" class="hover:text-bone">Pricing</a><a href="#start" class="hover:text-bone">Try it</a></nav>
+    <a href="#start" class="text-sm font-600 bg-gold text-ink px-4 py-2 rounded-lg hover:bg-goldlt transition">Make a free reel</a>
+  </div></header>
+
+  <section class="grad"><div class="max-w-6xl mx-auto px-5 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 text-xs text-gold border border-line rounded-full px-3 py-1 mb-6"><span class="w-1.5 h-1.5 rounded-full bg-gold"></span> Photos in · narrated branded video out · auto-posted</div>
+    <h1 class="font-serif text-4xl md:text-6xl font-700 leading-[1.05]">Every listing becomes<br/>a video. <span class="text-gold">Automatically.</span></h1>
+    <p class="mt-6 text-lg text-dim max-w-2xl mx-auto">Upload your listing photos and details — ListingReel writes the script, narrates it in your own voice, and assembles a branded walkthrough Reel ready to post. No editor, no videographer, no $500 invoice.</p>
+    <div class="mt-9 flex flex-col sm:flex-row gap-3 justify-center"><a href="#start" class="bg-gold text-ink font-600 px-6 py-3.5 rounded-xl hover:bg-goldlt transition">Make my first reel free</a><a href="#pricing" class="border border-line text-bone font-600 px-6 py-3.5 rounded-xl hover:border-gold transition">See pricing</a></div>
+    <p class="mt-5 text-xs text-dim">From <span class="text-bone font-600">$49/mo</span> · vs $250–1,000 per video from a videographer</p>
+  </div></section>
+
+  <section class="border-y border-line bg-panel/40"><div class="max-w-6xl mx-auto px-5 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+    <div><div class="font-serif text-3xl text-gold font-700">$250–1k</div><div class="text-xs text-dim mt-1">cost of one listing video</div></div>
+    <div><div class="font-serif text-3xl text-gold font-700">~2 min</div><div class="text-xs text-dim mt-1">to make one with ListingReel</div></div>
+    <div><div class="font-serif text-3xl text-gold font-700">2×</div><div class="text-xs text-dim mt-1">engagement of static posts</div></div>
+    <div><div class="font-serif text-3xl text-gold font-700">100%</div><div class="text-xs text-dim mt-1">your voice & branding</div></div>
+  </div></section>
+
+  <section id="how" class="max-w-6xl mx-auto px-5 py-20">
+    <h2 class="font-serif text-3xl md:text-4xl font-700 text-center">Three steps, zero editing</h2>
+    <div class="mt-12 grid md:grid-cols-3 gap-5">
+      <div class="card rounded-2xl p-6"><div class="text-gold font-serif text-2xl">01</div><h3 class="mt-3 font-600">Add the listing</h3><p class="text-sm text-dim mt-2">Upload photos + paste the address and key facts (or connect your portal).</p></div>
+      <div class="card rounded-2xl p-6"><div class="text-gold font-serif text-2xl">02</div><h3 class="mt-3 font-600">We build the reel</h3><p class="text-sm text-dim mt-2">AI writes a punchy walkthrough script, narrates it in your cloned voice, and assembles a branded video.</p></div>
+      <div class="card rounded-2xl p-6"><div class="text-gold font-serif text-2xl">03</div><h3 class="mt-3 font-600">Post everywhere</h3><p class="text-sm text-dim mt-2">Download or auto-publish to Instagram, TikTok, Facebook & YouTube — on brand, every time.</p></div>
+    </div>
+  </section>
+
+  <section id="why" class="bg-panel/40 border-y border-line"><div class="max-w-6xl mx-auto px-5 py-20 grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <h2 class="font-serif text-3xl md:text-4xl font-700">Your brand. Your voice. On autopilot.</h2>
+      <p class="text-dim mt-4">Record a 60-second voice sample once. From then on, every listing is narrated in your own voice with your logo and colors — the consistency that builds a recognizable agent brand, without the work.</p>
+      <ul class="mt-6 space-y-3 text-sm">
+        <li class="flex gap-3"><span class="text-gold">◆</span><span><b class="text-bone">Pennies per video.</b> We run our own render + voice engine, so we can price per-listing where others can't.</span></li>
+        <li class="flex gap-3"><span class="text-gold">◆</span><span><b class="text-bone">One consistent voice.</b> Your cloned narrator on every reel = a real brand, not random AI voices.</span></li>
+        <li class="flex gap-3"><span class="text-gold">◆</span><span><b class="text-bone">Brokerage-ready.</b> Add your whole team under one account with shared branding.</span></li>
+        <li class="flex gap-3"><span class="text-gold">◆</span><span><b class="text-bone">Set & forget.</b> New listing in → finished reel out → posted. You just close deals.</span></li>
+      </ul>
+    </div>
+    <div class="card rounded-2xl p-8">
+      <div class="text-xs text-dim uppercase tracking-widest">A typical agent</div>
+      <div class="mt-4 space-y-4 text-sm">
+        <div class="flex justify-between border-b border-line pb-3"><span class="text-dim">4 listings/month, videographer</span><span class="font-600">~$2,000</span></div>
+        <div class="flex justify-between border-b border-line pb-3"><span class="text-dim">Same with ListingReel (Pro)</span><span class="font-600 text-gold">$149</span></div>
+        <div class="flex justify-between"><span class="text-dim">Monthly saving</span><span class="font-600 text-gold">~$1,850</span></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="pricing" class="max-w-6xl mx-auto px-5 py-20">
+    <h2 class="font-serif text-3xl md:text-4xl font-700 text-center">Pricing</h2>
+    <p class="text-center text-dim mt-3">Cancel anytime. Overage just $9/extra listing.</p>
+    <div class="mt-12 grid md:grid-cols-3 gap-6">
+      <div class="card rounded-2xl p-7"><h3 class="font-600 text-lg">Starter</h3><div class="mt-3"><span class="font-serif text-4xl font-700">$49</span><span class="text-dim text-sm">/mo</span></div><ul class="mt-6 space-y-2.5 text-sm text-dim"><li>✓ 5 listing reels / mo</li><li>✓ Your cloned voice</li><li>✓ Branded template</li><li>✓ Download + share</li></ul><a href="#start" class="mt-7 block text-center border border-line rounded-xl py-3 font-600 hover:border-gold transition">Start free</a></div>
+      <div class="card rounded-2xl p-7 ring-1 ring-gold relative"><div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gold text-ink text-xs font-600 px-3 py-1 rounded-full">Most popular</div><h3 class="font-600 text-lg">Pro</h3><div class="mt-3"><span class="font-serif text-4xl font-700">$149</span><span class="text-dim text-sm">/mo</span></div><ul class="mt-6 space-y-2.5 text-sm text-dim"><li>✓ 20 listing reels / mo</li><li>✓ Auto-post to socials</li><li>✓ Custom branding</li><li>✓ Priority rendering</li></ul><a href="#start" class="mt-7 block text-center bg-gold text-ink rounded-xl py-3 font-600 hover:bg-goldlt transition">Start free</a></div>
+      <div class="card rounded-2xl p-7"><h3 class="font-600 text-lg">Brokerage</h3><div class="mt-3"><span class="font-serif text-4xl font-700">$399</span><span class="text-dim text-sm">/mo</span></div><ul class="mt-6 space-y-2.5 text-sm text-dim"><li>✓ Multi-agent team</li><li>✓ Shared brand kit</li><li>✓ Admin dashboard</li><li>✓ Onboarding + support</li></ul><a href="#start" class="mt-7 block text-center border border-line rounded-xl py-3 font-600 hover:border-gold transition">Book a demo</a></div>
+    </div>
+  </section>
+
+  <section id="start" class="bg-panel/40 border-y border-line"><div class="max-w-3xl mx-auto px-5 py-20 text-center">
+    <h2 class="font-serif text-3xl md:text-4xl font-700">Make your first reel — free</h2>
+    <p class="text-dim mt-3">Send us one listing and we'll send back a finished branded reel. No card needed.</p>
+    <form id="leadForm" class="mt-9 card rounded-2xl p-6 text-left grid gap-4">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div><label class="text-xs text-dim">Your email</label><input required type="email" name="email" class="mt-1 w-full bg-ink border border-line rounded-lg px-3 py-2.5 focus:border-gold outline-none" placeholder="you@realty.com" /></div>
+        <div><label class="text-xs text-dim">Listing URL / brokerage</label><input type="text" name="niche" class="mt-1 w-full bg-ink border border-line rounded-lg px-3 py-2.5 focus:border-gold outline-none" placeholder="link to a listing" /></div>
+      </div>
+      <button type="submit" class="bg-gold text-ink font-600 rounded-xl py-3.5 hover:bg-goldlt transition">Make my free reel</button>
+      <p id="leadMsg" class="text-sm text-dim text-center"></p>
+    </form>
+  </div></section>
+
+  <footer class="border-t border-line"><div class="max-w-6xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-dim"><span class="font-serif text-gold">ListingReel</span><span>© 2026 · Listing videos on autopilot</span></div></footer>
+
+  <script>document.getElementById('leadForm').addEventListener('submit',async function(e){e.preventDefault();var m=document.getElementById('leadMsg');var d=Object.fromEntries(new FormData(e.target).entries());d.source='listingreel';m.textContent='Sending…';m.className='text-sm text-dim text-center';if(!window.LEAD_ENDPOINT){m.textContent='✓ Demo: lead fanget.';m.className='text-sm text-gold text-center';e.target.reset();return;}try{var r=await fetch(window.LEAD_ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});m.textContent=r.ok?'✓ Tak! Din gratis reel er på vej.':'Noget gik galt — prøv igen.';m.className=r.ok?'text-sm text-gold text-center':'text-sm text-red-400 text-center';if(r.ok)e.target.reset();}catch(err){m.textContent='Netværksfejl — prøv igen.';m.className='text-sm text-red-400 text-center';}});</script>
+</body>
+</html>

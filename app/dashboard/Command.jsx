@@ -11,6 +11,7 @@ import {
 import AgentsTab from "./AgentsTab";
 import PerformanceTab from "./PerformanceTab";
 import ReportsTab from "./ReportsTab";
+import ImperiumTab from "./ImperiumTab";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
@@ -116,10 +117,11 @@ const SEED_DONE = [
   "f3s1","f3s2", // Supabase-projekt+schema ✓ · Port til Next.js (live på Vercel) ✓
   "f3s3",        // Cron: YouTube Analytics dagligt ✓ (2026-06-21: unique-constraints + selvhelende vindue, backfillet)
   "f3s5",        // Revenue/Udvikling-view ✓ (2026-06-21: stats_daily/earnings live, profit + per-video scorecard)
+  "f4s1","f4s2", // Kommentar-loop ✓ (2026-06-21: hentning + batch-klassificering, SOMI COMMENTS live)
   "f4s3",        // Ugentlig niche-rapport ✓ (SOMI Edge: konkurrent+performance, auto søndag→mandag)
   "f4s4",        // Idé-feedback-loop ✓ (2026-06-20: winner-loop + research-agent → idé-køen)
   "f5s1","f5s2", // QC-agent (factcheck, shadow) ✓ · Trend-agent (TREND) ✓
-  "rm2","rm3","rm6",   // Roadmap: Kadence ✓ · Dashboard Fase 3 ✓ · Self-host TTS ✓ (ElevenLabs erstattet jun. 2026)
+  "rm2","rm3","rm4","rm6",   // Roadmap: Kadence ✓ · Dashboard Fase 3 ✓ · Kommentar-AI ✓ · Self-host TTS ✓ (lokal stemmeklon, jun. 2026)
 ];
 
 const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
@@ -191,8 +193,8 @@ const CRED_ICON = { mic: Mic, cpu: Cpu, image: ImageIcon, server: Server, radio:
 const SEED_CREDITS = [
   { id: "tts", name: "TTS · self-host (Chatterbox)", kind: "Lokal · stemme (gratis)", icon: "mic",
     url: "", burn: "$0 — kører lokalt på render-serveren",
-    note: "Klonet egen stemme. Erstattede ElevenLabs (jun. 2026) → ingen credits, ingen kvote, ingen hæng.", status: "ok",
-    balance: "", lastTopup: "", runwayChars: "" },
+    note: "Klonet egen stemme, kører lokalt på render-serveren (jun. 2026) → ingen credits, ingen kvote, ingen hæng.", status: "ok",
+    balance: "", lastTopup: "" },
   { id: "anthropic", name: "Anthropic · Claude", kind: "API · scripts", icon: "cpu",
     url: "https://console.anthropic.com/settings/billing", burn: "~$0,30/video",
     note: "Slå auto-reload til så scripts aldrig stopper.", status: "ok", balance: "", lastTopup: "" },
@@ -263,7 +265,8 @@ const ROADMAP = [
   { t: "Dashboard (Fase 3)", d: "Port denne kommandocentral til Next.js + Supabase på Vercel. Daglig cron: YouTube Analytics → stats. Spejl data-felterne 1:1.", when: "Fase 3" },
   { t: "Kommentar-AI (Fase 4)", d: "Cron henter kommentarer → Haiku batch-klassificering → ugentlig niche-rapport → godkendte idéer tilbage i ideas. Lukket loop.", when: "Fase 4" },
   { t: "Kanal 2 (research: Maritime Disasters)", d: "Niche-research peger på Maritime Disasters som bedst AI-egnet (ingen ægte vrag-footage → AI-billeder er native æstetik), foran Engineering Disasters (stadig stærk runner-up). Evt. paraply-brand 'history's greatest disasters & mysteries'. Klon pipelinen, skift stilguide + kø — først når gate er grøn.", when: "Efter gate" },
-  { t: "Self-host TTS", d: "ElevenLabs erstattet af lokal Chatterbox-stemmeklon på render-serveren (jun. 2026) — nul credits, ingen kvote-stop, ingen hæng. Egen klonet stemme bevaret (cfg 0.3 + 1% mørkere).", when: "Gennemført ✓" },
+  { t: "Self-host TTS", d: "Lokal Chatterbox-stemmeklon på render-serveren (jun. 2026) — nul credits, ingen kvote-stop, ingen hæng; egen klonet stemme (cfg 0.3 + 1% mørkere). Nu også på SHORTS, MASTER har fejl-guard, og hele pipelinen kører på ny one.com-server.", when: "Gennemført ✓" },
+  { t: "AI-automations-imperium (venture-spor)", d: "Research jun. 2026: 6 færdige forretningsplaner + landing pages + live lead-backend (Supabase). Self-hosted render + gratis lokal stemmeklon = near-zero marginalkost på tværs. Start: Faceless Foundry (#1 — fabrikken er bygget) → domæne + ApS + Stripe → første pilot. Se fanen 'Kommende projekter'.", when: "Klar til launch" },
 ];
 
 const WATCH_ITEMS = [
@@ -316,6 +319,10 @@ const NAV_GROUPS = [
     { id: "byggeplan", label: "Byggeplan", Icon: ListChecks },
     { id: "roadmap", label: "Roadmap", Icon: Milestone },
     { id: "launchpad", label: "Launchpad", Icon: Rocket },
+  ] },
+  { label: "Imperiet", tabs: [
+    { id: "kommende", label: "Kommende projekter", Icon: Rocket },
+    { id: "eksempler", label: "Eksempler", Icon: Sparkles },
   ] },
 ];
 const NAV = NAV_GROUPS.flatMap((g) => g.tabs);
@@ -721,7 +728,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const monthlyChars = Math.round(cadence * 4.33 * 14000);
   const planPct = Math.round((monthlyChars / 131000) * 100);
   const monthlyUsd = Math.round(cadence * 4.33 * 8);
-  const ttsSavedMo = monthlyUsd; // self-host TTS: sparet pr. md vs ElevenLabs (nu $0)
+  const ttsSavedMo = monthlyUsd; // self-host TTS: sparet pr. md vs betalt TTS (nu $0)
   const gateDone = GATE.filter((_, i) => done.has("gate" + i)).length;
   const rmDone = ROADMAP.filter((_, i) => done.has("rm" + i)).length;
   const qcrDone = QC_READY.filter((_, i) => done.has("qcr" + i)).length;
@@ -1140,6 +1147,10 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {/* ───────── RAPPORTER ───────── */}
         {tab === "rapporter" && <ReportsTab />}
 
+        {/* ───────── KOMMENDE PROJEKTER / EKSEMPLER ───────── */}
+        {tab === "kommende" && <ImperiumTab view="plans" />}
+        {tab === "eksempler" && <ImperiumTab view="examples" />}
+
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (
           <>
@@ -1311,7 +1322,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
 
             <div className="sc-section-label">Aktivitets-log</div>
             <div className="sc-form" style={{ gridAutoFlow: "column", gridTemplateColumns: "1fr auto" }}>
-              <input className="sc-input" placeholder="Notér en hændelse (fx 'Wirecard live', 'ElevenLabs fyldt op $22')…" value={newLog}
+              <input className="sc-input" placeholder="Notér en hændelse (fx 'Wirecard live', 'Render-server genstartet')…" value={newLog}
                 onChange={(e) => setNewLog(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addLog()} />
               <button className="sc-btn primary" onClick={addLog}>Log</button>
             </div>
@@ -1655,8 +1666,6 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
               const sm = STATUS_META[c.status] || STATUS_META.ok;
               const since = daysSince(c.lastTopup);
               const cardCls = c.status === "kritisk" ? "crit" : c.status === "lav" ? "warn" : "";
-              const videosLeft = c.id === "elevenlabs" && c.runwayChars
-                ? Math.floor((Number(c.runwayChars) || 0) / 14000) : null;
               return (
                 <div key={c.id} className={`sc-cred ${cardCls}`}>
                   <div className="sc-cred-top">
@@ -1678,7 +1687,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                   {c.id === "tts" && (
                     <div className="sc-runway">
                       <span className="out" style={{ fontSize: 12.5 }}>
-                        <b style={{ color: "var(--green)" }}>Lokal · $0</b> · Chatterbox-klon på render-serveren · sparer ~${ttsSavedMo}/md vs ElevenLabs · ingen kvote/hæng
+                        <b style={{ color: "var(--green)" }}>Lokal · $0</b> · Chatterbox-klon på render-serveren · sparer ~${ttsSavedMo}/md i TTS-credits · ingen kvote/hæng
                       </span>
                     </div>
                   )}
@@ -1704,7 +1713,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
                     );
                   })()}
 
-                  {c.id !== "elevenlabs" && c.id !== "gemini" && (
+                  {c.id !== "gemini" && (
                     <div className="sc-runway">
                       <input type="text" placeholder="Saldo (fx $20)" value={c.balance || ""}
                         onChange={(e) => patchCredit(c.id, { balance: e.target.value })} aria-label="Saldo" />

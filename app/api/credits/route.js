@@ -31,7 +31,6 @@ export async function GET() {
   });
 
   const LABELS = {
-    elevenlabs: "ElevenLabs (VO)",
     spend_month: "Forbrug denne måned",
   };
   const items = (data || []).map((r) => ({

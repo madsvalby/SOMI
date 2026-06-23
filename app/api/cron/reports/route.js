@@ -50,7 +50,7 @@ async function buildSnapshot(admin) {
   (cost || []).forEach((c) => {
     const u = Number(c.usd_cost) || 0; spend += u;
     const m = String(c.model || "").toLowerCase();
-    const p = m.includes("eleven") ? "ElevenLabs" : (m.includes("claude") || m.includes("sonnet") || m.includes("opus")) ? "Anthropic" : (m.includes("gemini") || m.includes("nano")) ? "Gemini" : m.includes("render") ? "Render" : "Andet";
+    const p = (m.includes("claude") || m.includes("sonnet") || m.includes("opus")) ? "Anthropic" : (m.includes("gemini") || m.includes("nano")) ? "Gemini" : m.includes("render") ? "Render" : "Andet";
     byP[p] = (byP[p] || 0) + u;
   });
   const prov = Object.entries(byP).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} $${v.toFixed(2)}`).join(", ");
