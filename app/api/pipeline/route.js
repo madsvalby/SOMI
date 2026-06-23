@@ -65,8 +65,20 @@ export async function GET() {
     uploadet_privat: "Uploadet (privat)",
     published: "Publiceret",
   };
-  const queue = videos
-    .slice()
+  // Kollapsér dubletter pr. sag: pipelinen efterlader hængende "producerer"-rækker ved
+  // gentagne produktions-forsøg. Behold den mest fremskredne status (ellers nyeste række).
+  const STATUS_RANK = { published: 6, til_godkendelse: 5, needs_review: 5, uploadet_privat: 4, producerer: 2, idea: 1 };
+  const rank = (v) => STATUS_RANK[v.status] || 0;
+  const bestByCase = {};
+  videos.forEach((v) => {
+    const k = v.case_id || v.video_id;
+    const cur = bestByCase[k];
+    if (!cur || rank(v) > rank(cur) ||
+        (rank(v) === rank(cur) && String(v.created_at || "") > String(cur.created_at || ""))) {
+      bestByCase[k] = v;
+    }
+  });
+  const queue = Object.values(bestByCase)
     .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")))
     .map((v) => ({
       id: "vid_" + v.video_id,
