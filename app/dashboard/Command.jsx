@@ -425,7 +425,6 @@ export default function SomiCommand() {
 
   // ── Load ──
   useEffect(() => {
-    try { if (localStorage.getItem("somi_theme") === "dark") setDark(true); } catch (e) {}
     (async () => {
       const [d, ch, cr, ca, kp, lg, ac, co, ea] = await Promise.all([
         loadKey(K_CHECK, null), loadKey(K_CHAN, null), loadKey(K_CRED, null),
@@ -773,11 +772,35 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const grandCost = sum(costs);
   const grandNet = grandEarn - grandCost;
 
-  const toggleTheme = () => setDark((d) => {
-    const nd = !d;
-    try { localStorage.setItem("somi_theme", nd ? "dark" : "light"); } catch (e) {}
-    return nd;
-  });
+  // Tema: auto-mørk om aftenen (>=18) / nat (<6) dansk tid. Knappen overstyrer for
+  // resten af dagen; næste dag falder den tilbage til auto. Timer skifter live kl. 18.
+  function danishNow() {
+    const f = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Copenhagen", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false });
+    const p = Object.fromEntries(f.formatToParts(new Date()).map((x) => [x.type, x.value]));
+    return { hour: parseInt(p.hour, 10) % 24, day: `${p.year}-${p.month}-${p.day}` };
+  }
+  function autoIsDark() { const { hour } = danishNow(); return hour >= 18 || hour < 6; }
+  function effectiveDark() {
+    try {
+      const raw = localStorage.getItem("somi_theme");
+      const today = danishNow().day;
+      let pref = null;
+      if (raw === "dark" || raw === "light") pref = { mode: raw, day: today };
+      else if (raw) { const o = JSON.parse(raw); if (o && (o.mode === "dark" || o.mode === "light")) pref = o; }
+      if (pref && pref.day === today) return pref.mode === "dark"; // manuelt valg gælder i dag
+    } catch (e) {}
+    return autoIsDark();
+  }
+  const toggleTheme = () => {
+    const next = !dark;
+    try { localStorage.setItem("somi_theme", JSON.stringify({ mode: next ? "dark" : "light", day: danishNow().day })); } catch (e) {}
+    setDark(next);
+  };
+  useEffect(() => {
+    setDark(effectiveDark());
+    const id = setInterval(() => setDark(effectiveDark()), 60000); // re-evaluér auto (skifter ved 18:00)
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className={"sc-root" + (dark ? " sc-dark" : "")} style={{ "--gold": themeAccent, "--gold-bright": themeBright, zoom: 1.12 }}>
@@ -874,7 +897,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         .sc-chan.add:hover { border-color:var(--gold); color:var(--gold); }
 
         .sc-pill { font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase;
-          padding:4px 8px; border-radius:5px; border:1px solid; cursor:pointer; background:none; }
+          padding:4px 8px; border-radius:5px; border:1px solid var(--line); color:var(--bone-dim); cursor:pointer; background:none; }
+        .sc-pill:hover { border-color:var(--bone-faint); color:var(--bone); }
         .sc-pill.live, .sc-pill.ok { color:var(--green); border-color:rgba(108,174,126,0.5); }
         .sc-pill.building, .sc-pill.lav, .sc-pill.next { color:var(--amber); border-color:rgba(210,154,74,0.5); }
         .sc-pill.planned, .sc-pill.queued { color:var(--bone-faint); border-color:var(--line); }
@@ -1120,10 +1144,12 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </h1>
           </div>
           <div className="sc-mast-meta">
-            <button className="sc-theme-toggle" onClick={toggleTheme} aria-label="Skift tema"
-              title={dark ? "Skift til lyst tema" : "Skift til mørkt tema"} style={{ marginBottom: 8 }}>
-              {dark ? <Sun size={13} /> : <Moon size={13} />} {dark ? "Lyst" : "Mørkt"}
-            </button>
+            <div style={{ marginBottom: 12 }}>
+              <button className="sc-theme-toggle" onClick={toggleTheme} aria-label="Skift tema"
+                title={dark ? "Skift til lyst tema" : "Skift til mørkt tema"}>
+                {dark ? <Sun size={13} /> : <Moon size={13} />} {dark ? "Lyst" : "Mørkt"}
+              </button>
+            </div>
             {save === "saved"
               ? <span className="sc-save"><Check size={12} strokeWidth={3} /> Gemt</span>
               : <span><b>{liveChannels}</b> kanal{liveChannels === 1 ? "" : "er"} live · <b>{pct}%</b> bygget</span>}
