@@ -16,6 +16,7 @@ import CompanyRoadmaps from "./CompanyRoadmaps";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
 import TodaysMission from "./TodaysMission";
+import SideQuests from "./SideQuests";
 
 // ─────────────────────────────────────────────────────────────
 // SOMI COMMAND · Kommandocentral
@@ -1221,6 +1222,8 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "overblik" && (
           <>
             <TodaysMission analytics={analytics} liveVideos={liveVideos} onGoto={setTab} />
+
+            <SideQuests onGoto={setTab} />
 
             <div className="sc-kpis">
               <div className="sc-kpi"><div className="sc-kpi-num">{liveChannels}/{channels.length}</div><div className="sc-kpi-lbl">Kanaler live</div></div>
