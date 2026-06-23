@@ -62,7 +62,7 @@ export default function PerformanceTab({ onRefreshed }) {
 
   async function load() {
     try {
-      const r = await fetch("/api/performance");
+      const r = await fetch("/api/performance", { cache: "no-store" });
       if (r.ok) setData(await r.json());
       else setErr(true);
     } catch (e) { setErr(true); }
@@ -75,12 +75,14 @@ export default function PerformanceTab({ onRefreshed }) {
     setRefreshing(true);
     setNote("");
     try {
-      const r = await fetch("/api/performance/refresh", { method: "POST" });
+      const r = await fetch("/api/performance/refresh", { method: "POST", cache: "no-store" });
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
         await load();
         if (onRefreshed) onRefreshed();   // hold Overblik i sync (samme kanal-tal)
-        setNote("opdateret " + new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }));
+        const t = new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
+        const v = j && j.snapshot ? fmt(j.snapshot.views) : null;
+        setNote(v != null ? `opdateret ${t} · ${v} visninger` : "opdateret " + t);
       } else {
         setNote("fejl: " + (j.error || r.status));
       }
