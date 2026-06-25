@@ -1,10 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import { Check } from "lucide-react";
 
 // Faceless Foundry — "production pipeline tracker" mockup.
-// Ren CSS/SVG, server-komponent (ingen JS-runtime). Scoped <style>, unikt prefix "facelessm-".
-// Arver per-side accent via var(--accent). REDIGÉRER ALDRIG imperium.css.
+// Interaktiv: "Run pipeline" kører stepperen igennem alle trin i sekvens (~2.5s)
+// og ender på "Delivered ✓". Hvile-tilstand er uændret (aktiv på "Voicing").
+// Scoped <style>, unikt prefix "facelessm-". REDIGÉRER ALDRIG imperium.css.
 export default function FacelessMockup() {
-  const stages = [
+  const [run, setRun] = useState(0);
+
+  // Hvile-billede (run === 0): som det altid har set ud.
+  const idleStages = [
     { name: "Queued", state: "done" },
     { name: "Scripting", state: "done" },
     { name: "Human review", state: "done" },
@@ -14,6 +21,9 @@ export default function FacelessMockup() {
     { name: "Delivered", state: "soon" },
   ];
 
+  const stageNames = idleStages.map((s) => s.name);
+  const running = run > 0;
+
   return (
     <div className="pe-frame facelessm-frame">
       <div className="pe-frame-bar">
@@ -21,63 +31,88 @@ export default function FacelessMockup() {
         <span className="pe-frame-dot" style={{ background: "#FEBC2E" }} />
         <span className="pe-frame-dot" style={{ background: "#28C840" }} />
         <span className="pe-frame-url">studio · production pipeline</span>
+        <button
+          type="button"
+          className="pe-demo-btn facelessm-run"
+          aria-label="Run pipeline animation"
+          onClick={() => setRun((r) => r + 1)}
+        >
+          ▶ Run pipeline
+        </button>
       </div>
 
       <div className="pe-frame-body facelessm-body">
-        <div className="facelessm-top">
-          {/* Noir cinematic thumbnail-kort */}
-          <div className="facelessm-thumb">
-            <div className="facelessm-thumb-grain" />
-            <div className="facelessm-thumb-tag">DOCUMENTARY</div>
-            <div className="facelessm-thumb-title">
-              The&nbsp;$47B
-              <br />
-              Collapse
+        {/* Animeret del — remountes pr. klik via key={run} så CSS one-shot-animationerne kører forfra. */}
+        <div key={run} className={"facelessm-anim" + (running ? " facelessm-is-running" : "")}>
+          <div className="facelessm-top">
+            {/* Noir cinematic thumbnail-kort (uændret) */}
+            <div className="facelessm-thumb">
+              <div className="facelessm-thumb-grain" />
+              <div className="facelessm-thumb-tag">DOCUMENTARY</div>
+              <div className="facelessm-thumb-title">
+                The&nbsp;$47B
+                <br />
+                Collapse
+              </div>
+              <div className="facelessm-thumb-foot">
+                <span className="facelessm-rec" /> 23:14 · 4K
+              </div>
             </div>
-            <div className="facelessm-thumb-foot">
-              <span className="facelessm-rec" /> 23:14 · 4K
+
+            {/* Render status-kort */}
+            <div className="facelessm-status">
+              <div className="facelessm-status-label">
+                <span className="facelessm-status-idle">NOW VOICING</span>
+                <span className="facelessm-status-run">RUNNING PIPELINE</span>
+                <span className="facelessm-status-done">DELIVERED ✓</span>
+              </div>
+              <div className="facelessm-wave">
+                <span /><span /><span /><span /><span /><span /><span />
+              </div>
+              <div className="facelessm-render">
+                <div className="facelessm-render-head">
+                  <span>Rendering</span>
+                  <span className="facelessm-pct">62%</span>
+                </div>
+                <div className="facelessm-bar">
+                  <div className="facelessm-bar-fill" />
+                  <div className="facelessm-shimmer" />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Render status-kort */}
-          <div className="facelessm-status">
-            <div className="facelessm-status-label">NOW VOICING</div>
-            <div className="facelessm-wave">
-              <span /><span /><span /><span /><span /><span /><span />
-            </div>
-            <div className="facelessm-render">
-              <div className="facelessm-render-head">
-                <span>Rendering</span>
-                <span className="facelessm-pct">62%</span>
+          {/* Horisontal stepper-strip */}
+          <div className="facelessm-stepper">
+            {stageNames.map((name, i) => (
+              <div
+                key={name}
+                className={"facelessm-step facelessm-step-" + i + (running ? " facelessm-runstep" : " facelessm-" + idleStages[i].state)}
+                style={{ "--step-i": i }}
+              >
+                {i > 0 && <span className="facelessm-conn" aria-hidden />}
+                <span className="facelessm-node">
+                  {/* Hvile: ren statisk node. Run: alle noder får både check + pulse, CSS skifter dem ind sekventielt. */}
+                  {running ? (
+                    <>
+                      <span className="facelessm-pulse facelessm-run-pulse" />
+                      <Check size={12} strokeWidth={3} className="facelessm-check facelessm-run-check" />
+                    </>
+                  ) : idleStages[i].state === "done" ? (
+                    <Check size={12} strokeWidth={3} className="facelessm-check" />
+                  ) : idleStages[i].state === "active" ? (
+                    <span className="facelessm-pulse" />
+                  ) : (
+                    <span className="facelessm-empty" />
+                  )}
+                </span>
+                <span className="facelessm-step-label">{name}</span>
               </div>
-              <div className="facelessm-bar">
-                <div className="facelessm-bar-fill" />
-                <div className="facelessm-shimmer" />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Horisontal stepper-strip */}
-        <div className="facelessm-stepper">
-          {stages.map((s, i) => (
-            <div key={s.name} className={"facelessm-step facelessm-" + s.state}>
-              {i > 0 && <span className="facelessm-conn" aria-hidden />}
-              <span className="facelessm-node">
-                {s.state === "done" ? (
-                  <Check size={12} strokeWidth={3} className="facelessm-check" />
-                ) : s.state === "active" ? (
-                  <span className="facelessm-pulse" />
-                ) : (
-                  <span className="facelessm-empty" />
-                )}
-              </span>
-              <span className="facelessm-step-label">{s.name}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Cost-badge */}
+        {/* Cost-badge (uændret, uden for animationen) */}
         <div className="facelessm-badge">
           <span className="facelessm-badge-dot" />
           this video:&nbsp;
@@ -90,6 +125,10 @@ export default function FacelessMockup() {
       <style dangerouslySetInnerHTML={{ __html: `
         .facelessm-frame { width: 100%; max-width: 440px; margin-inline: auto; }
         .facelessm-body { display: flex; flex-direction: column; gap: 18px; }
+        .facelessm-anim { display: flex; flex-direction: column; gap: 18px; }
+
+        /* run-knap diskret i frame-baren, helt til højre */
+        .facelessm-run { margin-left: auto; padding: 4px 10px; font-size: 10px; }
 
         .facelessm-top { display: grid; grid-template-columns: 132px 1fr; gap: 14px; }
 
@@ -136,9 +175,12 @@ export default function FacelessMockup() {
           border-radius: 12px; padding: 14px;
         }
         .facelessm-status-label {
-          font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
-          color: var(--accent);
+          position: relative; font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+          color: var(--accent); min-height: 11px;
         }
+        /* hvile: vis NOW VOICING; skjul run/done-labels */
+        .facelessm-status-run, .facelessm-status-done { display: none; }
+
         .facelessm-wave { display: flex; align-items: flex-end; gap: 3px; height: 26px; }
         .facelessm-wave span {
           width: 4px; border-radius: 2px; background: var(--accent);
@@ -194,6 +236,8 @@ export default function FacelessMockup() {
           border-color: var(--accent);
           background: color-mix(in srgb, var(--accent) 18%, var(--panel));
         }
+        /* run-step: alle node-børn ligger ovenpå hinanden i samme grid-celle */
+        .facelessm-runstep .facelessm-node > * { grid-area: 1 / 1; }
         .facelessm-check { color: var(--accent); }
         .facelessm-active .facelessm-node {
           border-color: var(--accent);
@@ -240,6 +284,119 @@ export default function FacelessMockup() {
         @keyframes facelessm-blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.25; }
+        }
+
+        /* ───────────────────────────────────────────────────────────────────
+           ONE-SHOT RUN-ANIMATION
+           Sekvensen kører over ~2.5s. Hvert trin har sin egen forsinkelse
+           (--step-i * STEP). Alle run-keyframes bruger 'forwards' så de ender
+           i en pæn, stabil slut-tilstand: alle 7 trin done + check synligt,
+           sidste trin = "Delivered ✓". Ingen blink/forsvinden efter endt run.
+           ─────────────────────────────────────────────────────────────────── */
+        .facelessm-is-running .facelessm-status-idle { display: none; }
+        .facelessm-is-running .facelessm-status-run {
+          display: inline; animation: facelessm-status-swap 2.5s steps(1,end) forwards;
+        }
+        .facelessm-is-running .facelessm-status-done {
+          display: inline; opacity: 0; animation: facelessm-status-done 2.5s steps(1,end) forwards;
+        }
+        @keyframes facelessm-status-swap {
+          0% { opacity: 1; }
+          92%, 100% { opacity: 0; }
+        }
+        @keyframes facelessm-status-done {
+          0%, 91% { opacity: 0; }
+          92%, 100% { opacity: 1; }
+        }
+
+        /* connector "fyldes" trin for trin */
+        .facelessm-is-running .facelessm-runstep .facelessm-conn {
+          background: var(--line);
+          animation: facelessm-conn-fill 0.32s linear forwards;
+          animation-delay: calc(var(--step-i) * 0.34s);
+        }
+        @keyframes facelessm-conn-fill {
+          to { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+        }
+
+        /* node skifter til "done"-udseende når trinnet rammes */
+        .facelessm-is-running .facelessm-runstep .facelessm-node {
+          animation: facelessm-node-done 0.3s ease-out forwards;
+          animation-delay: calc(var(--step-i) * 0.34s + 0.1s);
+        }
+        @keyframes facelessm-node-done {
+          0% { border-color: var(--line); background: var(--panel); box-shadow: 0 0 0 0 var(--accent-soft); transform: scale(1); }
+          55% { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); transform: scale(1.18); }
+          100% {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+            box-shadow: 0 0 0 0 var(--accent-soft); transform: scale(1);
+          }
+        }
+
+        /* aktiv-pulse: lyser kun mens "markøren" står på trinnet, så slukker den */
+        .facelessm-is-running .facelessm-run-pulse {
+          opacity: 0; animation: facelessm-run-pulse 0.34s ease-in-out forwards;
+          animation-delay: calc(var(--step-i) * 0.34s);
+        }
+        @keyframes facelessm-run-pulse {
+          0% { opacity: 1; transform: scale(0.6); }
+          50% { opacity: 1; transform: scale(1.5); }
+          100% { opacity: 0; transform: scale(1.5); }
+        }
+
+        /* check tikker ind når trinnet er færdigt og bliver stående (forwards) */
+        .facelessm-is-running .facelessm-run-check {
+          opacity: 0; transform: scale(0.4);
+          animation: facelessm-run-check 0.28s cubic-bezier(.2,1.4,.4,1) forwards;
+          animation-delay: calc(var(--step-i) * 0.34s + 0.16s);
+        }
+        @keyframes facelessm-run-check {
+          0% { opacity: 0; transform: scale(0.4); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* label fremhæves når markøren passerer og dæmpes til done bagefter */
+        .facelessm-is-running .facelessm-runstep .facelessm-step-label {
+          color: var(--faint);
+          animation: facelessm-label-done 0.34s linear forwards;
+          animation-delay: calc(var(--step-i) * 0.34s + 0.16s);
+        }
+        @keyframes facelessm-label-done {
+          to { color: var(--dim); }
+        }
+        /* sidste trin (Delivered) ender fremhævet i accent */
+        .facelessm-is-running .facelessm-step-6 .facelessm-step-label {
+          animation: facelessm-label-delivered 0.34s linear forwards;
+          animation-delay: calc(6 * 0.34s + 0.16s);
+        }
+        @keyframes facelessm-label-delivered {
+          to { color: var(--accent); font-weight: 600; }
+        }
+
+        /* ── reduced motion: vis færdig slut-tilstand uden bevægelse ── */
+        @media (prefers-reduced-motion: reduce) {
+          .facelessm-rec, .facelessm-wave span, .facelessm-shimmer, .facelessm-pulse { animation: none !important; }
+          .facelessm-is-running .facelessm-status-run { display: none; }
+          .facelessm-is-running .facelessm-status-done { opacity: 1; }
+
+          .facelessm-is-running .facelessm-runstep .facelessm-conn,
+          .facelessm-is-running .facelessm-runstep .facelessm-node,
+          .facelessm-is-running .facelessm-run-pulse,
+          .facelessm-is-running .facelessm-run-check,
+          .facelessm-is-running .facelessm-runstep .facelessm-step-label,
+          .facelessm-is-running .facelessm-step-6 .facelessm-step-label { animation: none !important; }
+
+          .facelessm-is-running .facelessm-runstep .facelessm-conn { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+          .facelessm-is-running .facelessm-runstep .facelessm-node {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+            box-shadow: none;
+          }
+          .facelessm-is-running .facelessm-run-pulse { opacity: 0; }
+          .facelessm-is-running .facelessm-run-check { opacity: 1; transform: scale(1); }
+          .facelessm-is-running .facelessm-runstep .facelessm-step-label { color: var(--dim); }
+          .facelessm-is-running .facelessm-step-6 .facelessm-step-label { color: var(--accent); font-weight: 600; }
         }
 
         @media (max-width: 520px) {

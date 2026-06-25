@@ -1,11 +1,22 @@
-// Ringback AI — "live call card" mockup. Server-komponent, ren CSS/SVG, ingen JS-runtime.
+// Ringback AI — "live call card" mockup. Interaktiv: klik "Play call" afspiller opkaldet.
 // Scoped <style> med unikt prefix "ringbackm-". Arver per-side accent via var(--accent).
+"use client";
+import { useState } from "react";
+
 export default function RingbackMockup() {
+  const [run, setRun] = useState(0);
+  // run === 0  → roligt hvile-look (fuld tilstand, idle-animationer som før)
+  // run  >  0  → one-shot afspilning: sekvensen remountes via key={run}
+  const playing = run > 0;
+
   return (
     <div className="ringbackm-wrap">
       <style dangerouslySetInnerHTML={{ __html: `
         .ringbackm-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
         .ringbackm-frame .pe-frame-body { padding: 16px; }
+
+        /* play-knap diskret i frame-baren */
+        .ringbackm-bar-spacer { flex: 1; }
 
         /* top: live status + waveform */
         .ringbackm-top {
@@ -40,7 +51,11 @@ export default function RingbackMockup() {
         .ringbackm-wave span:nth-child(8) { animation-delay: -0.4s; }
 
         /* transcript stream */
-        .ringbackm-stream { display: flex; flex-direction: column; gap: 9px; }
+        .ringbackm-stream {
+          display: flex; flex-direction: column; gap: 9px;
+          /* reservér plads, så afspilning ikke laver layout-shift */
+          min-height: 132px;
+        }
         .ringbackm-row { display: flex; }
         .ringbackm-row.ai { justify-content: flex-start; }
         .ringbackm-row.caller { justify-content: flex-end; }
@@ -116,12 +131,70 @@ export default function RingbackMockup() {
         @keyframes ringbackm-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
         @keyframes ringbackm-type { 0%,100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
 
+        /* ── one-shot afspilning (kun aktiv mens .is-playing) ───────────── */
+        /* alt animeret starter skjult og lander forwards i en stabil slut-tilstand */
+        .ringbackm-anim.is-playing .ringbackm-row,
+        .ringbackm-anim.is-playing .ringbackm-typing,
+        .ringbackm-anim.is-playing .ringbackm-badge,
+        .ringbackm-anim.is-playing .ringbackm-kv .v {
+          opacity: 0;
+        }
+        /* boble-indtog */
+        .ringbackm-anim.is-playing .ringbackm-row {
+          animation: ringbackm-bubble-in 0.42s ease-out forwards;
+        }
+        /* Caller taler først, AI svarer bagefter */
+        .ringbackm-anim.is-playing .ringbackm-row.caller { animation-delay: 0.30s; }
+        .ringbackm-anim.is-playing .ringbackm-row.ai     { animation-delay: 1.45s; }
+
+        /* typing-prikker mellem caller og AI-svar: vis i mellemrummet, fade ud */
+        .ringbackm-anim.is-playing .ringbackm-typing {
+          animation: ringbackm-typing-show 0.01s linear 1.55s forwards;
+        }
+        @keyframes ringbackm-typing-show { to { opacity: 1; } }
+        /* (prikkernes egen blink-animation kører som vanligt mens de er synlige) */
+
+        /* waveform: kun "AI taler" mens AI-boblen er fremme (efter ~1.45s) */
+        .ringbackm-anim.is-playing .ringbackm-wave span {
+          animation-play-state: paused;
+        }
+        .ringbackm-anim.is-playing .ringbackm-wave {
+          animation: ringbackm-wave-gate 0s linear 1.45s forwards;
+        }
+        /* lead-felter fyldes ind i sekvens efter samtalen */
+        .ringbackm-anim.is-playing .ringbackm-kv .v {
+          animation: ringbackm-fill 0.34s ease-out forwards;
+        }
+        .ringbackm-anim.is-playing .ringbackm-kv .r:nth-child(1) .v { animation-delay: 2.30s; }
+        .ringbackm-anim.is-playing .ringbackm-kv .r:nth-child(2) .v { animation-delay: 2.60s; }
+        .ringbackm-anim.is-playing .ringbackm-kv .r:nth-child(3) .v { animation-delay: 2.90s; }
+        .ringbackm-anim.is-playing .ringbackm-kv .r:nth-child(4) .v { animation-delay: 3.20s; }
+        /* badge "Texted to you" kommer til sidst */
+        .ringbackm-anim.is-playing .ringbackm-badge {
+          animation: ringbackm-fill 0.40s ease-out 3.60s forwards;
+        }
+
+        @keyframes ringbackm-bubble-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes ringbackm-fill {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 540px) {
           .ringbackm-bubble { max-width: 88%; font-size: 12px; }
           .ringbackm-wave { height: 22px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .ringbackm-wave span, .ringbackm-live .dot, .ringbackm-typing i { animation: none !important; }
+          /* vis slut-tilstanden uden bevægelse, også under "afspilning" */
+          .ringbackm-anim.is-playing .ringbackm-row,
+          .ringbackm-anim.is-playing .ringbackm-typing,
+          .ringbackm-anim.is-playing .ringbackm-badge,
+          .ringbackm-anim.is-playing .ringbackm-kv .v { opacity: 1 !important; animation: none !important; }
+          .ringbackm-anim.is-playing .ringbackm-wave span { animation-play-state: running; }
         }
       ` }} />
 
@@ -131,75 +204,87 @@ export default function RingbackMockup() {
           <span className="pe-frame-dot" style={{ background: "#E6C877" }} />
           <span className="pe-frame-dot" style={{ background: "#3FA66A" }} />
           <span className="pe-frame-url">ringback · live call</span>
+          <span className="ringbackm-bar-spacer" />
+          <button
+            type="button"
+            className="pe-demo-btn"
+            aria-label="Play the Ringback AI call demo"
+            onClick={() => setRun((r) => r + 1)}
+          >
+            ▶ Play call
+          </button>
         </div>
 
         <div className="pe-frame-body">
-          {/* top: live status + waveform */}
-          <div className="ringbackm-top">
-            <span className="ringbackm-live">
-              <span className="dot" />
-              Live <span className="t">· 0:42</span>
-            </span>
-            <div className="ringbackm-wave" aria-hidden="true">
-              <span style={{ height: "40%" }} />
-              <span style={{ height: "75%" }} />
-              <span style={{ height: "55%" }} />
-              <span style={{ height: "95%" }} />
-              <span style={{ height: "60%" }} />
-              <span style={{ height: "85%" }} />
-              <span style={{ height: "45%" }} />
-              <span style={{ height: "70%" }} />
+          {/* Animeret del: remountes ved hvert klik via key={run} → one-shot afspilning forfra */}
+          <div key={run} className={"ringbackm-anim" + (playing ? " is-playing" : "")}>
+            {/* top: live status + waveform */}
+            <div className="ringbackm-top">
+              <span className="ringbackm-live">
+                <span className="dot" />
+                Live <span className="t">{playing ? "· 0:00" : "· 0:42"}</span>
+              </span>
+              <div className="ringbackm-wave" aria-hidden="true">
+                <span style={{ height: "40%" }} />
+                <span style={{ height: "75%" }} />
+                <span style={{ height: "55%" }} />
+                <span style={{ height: "95%" }} />
+                <span style={{ height: "60%" }} />
+                <span style={{ height: "85%" }} />
+                <span style={{ height: "45%" }} />
+                <span style={{ height: "70%" }} />
+              </div>
+            </div>
+
+            {/* transcript stream */}
+            <div className="ringbackm-stream">
+              <div className="ringbackm-row caller">
+                <div className="ringbackm-bubble">
+                  <div className="ringbackm-who">Caller</div>
+                  My sink is flooding
+                </div>
+              </div>
+              <div className="ringbackm-row ai">
+                <div className="ringbackm-bubble">
+                  <div className="ringbackm-who">Ringback AI</div>
+                  I can get a plumber to you today at 2pm — booking now…
+                  <span className="ringbackm-typing" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* auto-filled lead card */}
+            <div className="ringbackm-lead">
+              <div className="ringbackm-lead-head">
+                <span className="ringbackm-lead-title">Lead captured</span>
+                <span className="ringbackm-badge">Texted to you</span>
+              </div>
+              <div className="ringbackm-kv">
+                <div className="r">
+                  <span className="k">Name</span>
+                  <span className="v">—</span>
+                </div>
+                <div className="r">
+                  <span className="k">Number</span>
+                  <span className="v">+1 (415) 555-0147</span>
+                </div>
+                <div className="r">
+                  <span className="k">Reason</span>
+                  <span className="v accent">Emergency leak</span>
+                </div>
+                <div className="r">
+                  <span className="k">Booked</span>
+                  <span className="v">Today 2:00pm</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* transcript stream */}
-          <div className="ringbackm-stream">
-            <div className="ringbackm-row caller">
-              <div className="ringbackm-bubble">
-                <div className="ringbackm-who">Caller</div>
-                My sink is flooding
-              </div>
-            </div>
-            <div className="ringbackm-row ai">
-              <div className="ringbackm-bubble">
-                <div className="ringbackm-who">Ringback AI</div>
-                I can get a plumber to you today at 2pm — booking now…
-                <span className="ringbackm-typing" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* auto-filled lead card */}
-          <div className="ringbackm-lead">
-            <div className="ringbackm-lead-head">
-              <span className="ringbackm-lead-title">Lead captured</span>
-              <span className="ringbackm-badge">Texted to you</span>
-            </div>
-            <div className="ringbackm-kv">
-              <div className="r">
-                <span className="k">Name</span>
-                <span className="v">—</span>
-              </div>
-              <div className="r">
-                <span className="k">Number</span>
-                <span className="v">+1 (415) 555-0147</span>
-              </div>
-              <div className="r">
-                <span className="k">Reason</span>
-                <span className="v accent">Emergency leak</span>
-              </div>
-              <div className="r">
-                <span className="k">Booked</span>
-                <span className="v">Today 2:00pm</span>
-              </div>
-            </div>
-          </div>
-
-          {/* compliance stripe */}
+          {/* compliance stripe — uændret, uden for afspilnings-containeren */}
           <div className="ringbackm-comply">
             <svg
               className="shield"

@@ -1,6 +1,14 @@
-// Beacon — AI-citation tracker dashboard mockup. Server component, pure CSS/SVG, no JS runtime.
+"use client";
+
+// Beacon — AI-citation tracker dashboard mockup. Client component for a one-shot "run a query" demo.
 // Scoped styles prefixed "beaconm-". Uses var(--accent) so it inherits the per-page accent.
+// Idle (run===0): the full dashboard sits calm and finished. Clicking "Run a query" remounts the
+// animated body (key={run}) so the whole sequence replays from scratch and ends in the same state.
+import { useState } from "react";
+
 export default function BeaconMockup() {
+  const [run, setRun] = useState(0);
+
   // Gauge arc geometry (semi-circle, 34% citation rate).
   const R = 52;
   const CIRC = Math.PI * R; // half-circle length
@@ -21,6 +29,9 @@ export default function BeaconMockup() {
     { name: "Google AIO", pct: "12%", pts: "0,9 8,8 16,9 24,7 32,8 40,6 48,6" },
   ];
 
+  // Idle vs. running. `running` only flips the body into its keyframe-driven sequence.
+  const running = run > 0;
+
   return (
     <div className="beaconm-wrap">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -40,7 +51,43 @@ export default function BeaconMockup() {
           font-family: var(--mono); font-size: 11px;
           color: var(--faint); margin-left: 8px;
         }
-        .beaconm-body { padding: 16px; }
+        .beaconm-runbtn { margin-left: auto; }
+        .beaconm-body { padding: 16px; position: relative; }
+
+        /* Prompt overlay — reserves no layout space (absolutely positioned), fades+types in then out. */
+        .beaconm-prompt {
+          position: absolute; top: 8px; left: 16px; right: 16px; z-index: 3;
+          display: flex; align-items: center; gap: 8px;
+          padding: 9px 12px; border-radius: 10px;
+          background: color-mix(in srgb, var(--panel-2) 92%, var(--accent));
+          border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line));
+          box-shadow: 0 14px 30px -18px rgba(0,0,0,0.9);
+          opacity: 0; pointer-events: none;
+        }
+        .beaconm-running .beaconm-prompt {
+          animation: beaconm-prompt-life 2.1s ease-out forwards;
+        }
+        .beaconm-prompt-ic {
+          font-family: var(--mono); font-size: 12px; color: var(--accent); flex-shrink: 0;
+        }
+        .beaconm-prompt-txt {
+          font-family: var(--mono); font-size: 11.5px; color: var(--bone);
+          white-space: nowrap; overflow: hidden; max-width: 0;
+        }
+        .beaconm-running .beaconm-prompt-txt {
+          animation: beaconm-type 1.1s steps(22, end) 0.15s forwards;
+          border-right: 1.5px solid var(--accent);
+        }
+        @keyframes beaconm-prompt-life {
+          0%   { opacity: 0; transform: translateY(-4px); }
+          12%  { opacity: 1; transform: translateY(0); }
+          78%  { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-4px); }
+        }
+        @keyframes beaconm-type {
+          from { max-width: 0; }
+          to   { max-width: 100%; }
+        }
 
         .beaconm-top { display: grid; grid-template-columns: 132px 1fr; gap: 16px; }
 
@@ -50,9 +97,11 @@ export default function BeaconMockup() {
         }
         .beaconm-gauge { position: relative; text-align: center; }
         .beaconm-gauge svg { display: block; }
-        .beaconm-arc {
-          stroke-dasharray: ${dash} ${CIRC};
-          animation: beaconm-draw 1.4s ease-out forwards;
+
+        /* Idle: arc already drawn to its final length, no animation. */
+        .beaconm-arc { stroke-dasharray: ${dash} ${CIRC}; }
+        .beaconm-running .beaconm-arc {
+          animation: beaconm-draw 1.4s ease-out 1.15s backwards;
         }
         @keyframes beaconm-draw {
           from { stroke-dasharray: 0 ${CIRC}; }
@@ -63,8 +112,33 @@ export default function BeaconMockup() {
           font-family: var(--serif); font-weight: 700; font-size: 26px;
           color: var(--bone); line-height: 1;
         }
+        /* Count-up using an animatable custom property fed into a CSS counter.
+           Fallback: where @property is unsupported, the static <span> "34" simply stays. */
+        @property --beaconm-n {
+          syntax: "<integer>"; initial-value: 34; inherits: false;
+        }
+        .beaconm-running .beaconm-gauge-val .beaconm-count {
+          /* Hide the literal text; show the animated counter via ::after instead.
+             The var() carries an explicit 34 fallback so that where @property is
+             NOT registered, counter-reset stays valid and the counter resolves to
+             34 (a static final value) rather than an invalid/0 reading. */
+          font-size: 0;
+          counter-reset: beaconm-n var(--beaconm-n, 34);
+          animation: beaconm-tick 1.3s cubic-bezier(.2,.7,.2,1) 1.15s backwards;
+        }
+        .beaconm-running .beaconm-gauge-val .beaconm-count::after {
+          content: counter(beaconm-n);
+          font-size: 26px;
+        }
+        @keyframes beaconm-tick {
+          from { --beaconm-n: 0; }
+          to   { --beaconm-n: 34; }
+        }
         .beaconm-gauge-sub {
           font-size: 10px; color: var(--dim); margin-top: 2px;
+        }
+        .beaconm-running .beaconm-gauge-sub {
+          animation: beaconm-fade-in 0.4s ease-out 2.5s backwards;
         }
 
         .beaconm-sov-row {
@@ -79,9 +153,17 @@ export default function BeaconMockup() {
         .beaconm-fill {
           height: 100%; border-radius: 4px;
           background: color-mix(in srgb, var(--accent) 28%, var(--line));
-          transform-origin: left; animation: beaconm-grow 1.1s ease-out forwards;
+          transform-origin: left;
         }
         .beaconm-fill.you { background: var(--accent); }
+        /* Idle: bars already grown. Running: stagger them in after the gauge. */
+        .beaconm-running .beaconm-fill {
+          animation: beaconm-grow 1.1s ease-out backwards;
+        }
+        .beaconm-running .beaconm-sov-row:nth-child(2) .beaconm-fill { animation-delay: 1.6s; }
+        .beaconm-running .beaconm-sov-row:nth-child(3) .beaconm-fill { animation-delay: 1.75s; }
+        .beaconm-running .beaconm-sov-row:nth-child(4) .beaconm-fill { animation-delay: 1.9s; }
+        .beaconm-running .beaconm-sov-row:nth-child(5) .beaconm-fill { animation-delay: 2.05s; }
         @keyframes beaconm-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
         .beaconm-sov-pct {
           font-family: var(--mono); font-size: 10.5px; color: var(--dim);
@@ -91,6 +173,9 @@ export default function BeaconMockup() {
 
         .beaconm-engines {
           margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 14px;
+        }
+        .beaconm-running .beaconm-engines {
+          animation: beaconm-fade-in 0.5s ease-out 2.3s backwards;
         }
         .beaconm-eng-row {
           display: grid; grid-template-columns: 78px 52px 1fr;
@@ -108,14 +193,45 @@ export default function BeaconMockup() {
           background: color-mix(in srgb, #E0A34E 12%, transparent);
           border: 1px solid color-mix(in srgb, #E0A34E 38%, var(--line));
         }
+        /* Idle: alert sits in place. Running: slide it in last. */
+        .beaconm-running .beaconm-alert {
+          animation: beaconm-slide-in 0.55s cubic-bezier(.2,.8,.2,1) 2.7s backwards;
+        }
         .beaconm-alert-ic { color: #E6B860; font-size: 13px; line-height: 1.3; flex-shrink: 0; }
         .beaconm-alert-txt { font-size: 11px; color: var(--dim); line-height: 1.45; }
         .beaconm-alert-txt b { color: var(--bone); font-weight: 600; }
         .beaconm-fix { color: var(--accent); font-weight: 600; }
 
+        @keyframes beaconm-fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes beaconm-slide-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 420px) {
           .beaconm-top { grid-template-columns: 1fr; }
           .beaconm-eng-row { grid-template-columns: 70px 46px 1fr; }
+        }
+
+        /* Respect reduced-motion: kill every demo animation, land on the final state instantly. */
+        @media (prefers-reduced-motion: reduce) {
+          .beaconm-running .beaconm-prompt { display: none; }
+          .beaconm-arc,
+          .beaconm-running .beaconm-arc,
+          .beaconm-running .beaconm-prompt-txt,
+          .beaconm-running .beaconm-gauge-val .beaconm-count,
+          .beaconm-running .beaconm-gauge-sub,
+          .beaconm-running .beaconm-fill,
+          .beaconm-running .beaconm-engines,
+          .beaconm-running .beaconm-alert {
+            animation: none !important;
+          }
+          /* Show the plain "34" text, not the counter pseudo-element. */
+          .beaconm-running .beaconm-gauge-val .beaconm-count { font-size: 26px; }
+          .beaconm-running .beaconm-gauge-val .beaconm-count::after { content: none; }
         }
       ` }} />
 
@@ -125,9 +241,29 @@ export default function BeaconMockup() {
           <span className="beaconm-dot" style={{ background: "#FEBC2E" }} />
           <span className="beaconm-dot" style={{ background: "#28C840" }} />
           <span className="beaconm-url">beacon.app/dashboard</span>
+          <button
+            type="button"
+            className="pe-demo-btn beaconm-runbtn"
+            aria-label="Run a sample AI-visibility query to replay the dashboard"
+            onClick={() => setRun((r) => r + 1)}
+          >
+            ▶ Run a query
+          </button>
         </div>
 
-        <div className="beaconm-body">
+        {/* Animated body — remounted on each run via key so the one-shot sequence replays. */}
+        <div
+          key={run}
+          className={"beaconm-body" + (running ? " beaconm-running" : "")}
+        >
+          {/* Sample-prompt overlay (only meaningful while running; absolutely positioned → no layout shift). */}
+          {running && (
+            <div className="beaconm-prompt" aria-hidden="true">
+              <span className="beaconm-prompt-ic">›_</span>
+              <span className="beaconm-prompt-txt">best AI-visibility tool?</span>
+            </div>
+          )}
+
           <div className="beaconm-top">
             {/* Citation rate gauge */}
             <div>
@@ -150,7 +286,9 @@ export default function BeaconMockup() {
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="beaconm-gauge-val">34%</div>
+                <div className="beaconm-gauge-val">
+                  <span className="beaconm-count">34</span>%
+                </div>
                 <div className="beaconm-gauge-sub">+6 pts / 30d</div>
               </div>
             </div>

@@ -1,17 +1,53 @@
-// AdForge "hook-matrix" mockup — ren CSS/SVG, ingen JS-runtime.
+"use client";
+// AdForge "hook-matrix" mockup — interaktiv shuffle (re-staggrer + flytter winners).
 // Scoped <style> med unikt prefix "adforgem-". Arver --accent fra siden.
+import { useState } from "react";
+
+// Basis-cellerne (hook + grund-metrik). Winner-status + winner-metrikker
+// beregnes pr. run, så "overproducér og find vindere" føles levende.
+const BASE = [
+  { hook: "POV: you found it", ctr: "2.1%", cpa: "-31%" },
+  { hook: "I was skeptical until…", ctr: "1.9%", cpa: "-24%" },
+  { hook: "3 reasons you need this", ctr: "1.4%", cpa: "-12%" },
+  { hook: "Stop scrolling", ctr: "2.4%", cpa: "-29%" },
+  { hook: "POV: you found it", ctr: "2.0%", cpa: "-33%" },
+  { hook: "I was skeptical until…", ctr: "1.6%", cpa: "-18%" },
+  { hook: "3 reasons you need this", ctr: "1.7%", cpa: "-21%" },
+  { hook: "Stop scrolling", ctr: "1.5%", cpa: "-15%" },
+  { hook: "POV: you found it", ctr: "2.2%", cpa: "-27%" },
+];
+
+// Winner-par pr. run-rotation. Run 0 = hvile-look (celle 1 & 4 — samme som før).
+const WINNER_PAIRS = [
+  [1, 4],
+  [3, 8],
+  [0, 6],
+  [2, 7],
+  [5, 1],
+  [8, 3],
+];
+
+// Vindende celler får et løft i tallene, så CTR/CPA visuelt "flytter sig".
+const WIN_METRICS = [
+  { ctr: "3.0%", cpa: "-38%" },
+  { ctr: "2.8%", cpa: "-41%" },
+  { ctr: "3.2%", cpa: "-36%" },
+  { ctr: "2.9%", cpa: "-44%" },
+];
+
 export default function AdforgeMockup() {
-  const cells = [
-    { hook: "POV: you found it", ctr: "2.1%", cpa: "-31%", win: false },
-    { hook: "I was skeptical until…", ctr: "1.9%", cpa: "-24%", win: true },
-    { hook: "3 reasons you need this", ctr: "1.4%", cpa: "-12%", win: false },
-    { hook: "Stop scrolling", ctr: "2.4%", cpa: "-29%", win: false },
-    { hook: "POV: you found it", ctr: "2.0%", cpa: "-33%", win: true },
-    { hook: "I was skeptical until…", ctr: "1.6%", cpa: "-18%", win: false },
-    { hook: "3 reasons you need this", ctr: "1.7%", cpa: "-21%", win: false },
-    { hook: "Stop scrolling", ctr: "1.5%", cpa: "-15%", win: false },
-    { hook: "POV: you found it", ctr: "2.2%", cpa: "-27%", win: false },
-  ];
+  const [run, setRun] = useState(0);
+
+  const pair = WINNER_PAIRS[run % WINNER_PAIRS.length];
+  const cells = BASE.map((c, idx) => {
+    const winSlot = pair.indexOf(idx);
+    if (winSlot === -1) return { ...c, win: false };
+    const m = WIN_METRICS[(run + winSlot) % WIN_METRICS.length];
+    // Hvile-look (run 0) bevarer de oprindelige tal på winner-cellerne.
+    return run === 0
+      ? { ...c, win: true }
+      : { ...c, win: true, ctr: m.ctr, cpa: m.cpa };
+  });
 
   return (
     <div className="adforgem-wrap pe-float">
@@ -21,6 +57,14 @@ export default function AdforgeMockup() {
           <span className="pe-frame-dot" style={{ background: "#E8B84B" }} />
           <span className="pe-frame-dot" style={{ background: "#3FA66A" }} />
           <span className="pe-frame-url">adforge.studio/matrix</span>
+          <button
+            type="button"
+            className="pe-demo-btn adforgem-trigger"
+            onClick={() => setRun((r) => r + 1)}
+            aria-label="Shuffle ad variants and re-pick winners"
+          >
+            ▶ Shuffle variants
+          </button>
         </div>
         <div className="pe-frame-body adforgem-body">
           <div className="adforgem-filters">
@@ -31,12 +75,12 @@ export default function AdforgeMockup() {
             <span className="adforgem-compliance">AI-disclosed · C2PA</span>
           </div>
 
-          <div className="adforgem-grid">
+          <div className="adforgem-grid" key={run}>
             {cells.map((c, idx) => (
               <div
                 key={idx}
                 className={"adforgem-cell" + (c.win ? " adforgem-cell--win" : "")}
-                style={{ "--d": idx * 0.07 + "s" }}
+                style={{ "--d": idx * 0.06 + "s" }}
               >
                 <div className="adforgem-caption">{c.hook}</div>
                 <div className="adforgem-presenter" />
@@ -54,6 +98,8 @@ export default function AdforgeMockup() {
       <style dangerouslySetInnerHTML={{ __html: `
         .adforgem-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
         .adforgem-body { padding: 16px; }
+
+        .adforgem-trigger { margin-left: 10px; }
 
         .adforgem-filters {
           display: flex; align-items: center; gap: 8px;
@@ -86,10 +132,11 @@ export default function AdforgeMockup() {
           position: relative; aspect-ratio: 9 / 16; border-radius: 10px;
           overflow: hidden; border: 1px solid var(--line);
           background: linear-gradient(180deg, var(--panel-2), var(--panel));
-          opacity: 0; transform: translateY(10px);
-          animation: adforgem-rise 0.5s ease-out forwards;
+          opacity: 0; transform: translateY(10px) scale(0.97);
+          animation: adforgem-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
           animation-delay: var(--d);
         }
+        /* Winner-rammen toner ind, så den ikke "popper" hårdt ved shuffle. */
         .adforgem-cell--win {
           box-shadow: 0 0 0 2px var(--accent);
           border-color: transparent;
@@ -123,6 +170,8 @@ export default function AdforgeMockup() {
           letter-spacing: 0.12em; color: var(--ink);
           background: var(--accent); padding: 3px 8px; border-radius: 5px;
           box-shadow: 0 6px 16px -6px var(--glow);
+          animation: adforgem-stamp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+          animation-delay: calc(var(--d) + 0.18s);
         }
 
         .adforgem-metrics {
@@ -137,7 +186,11 @@ export default function AdforgeMockup() {
         .adforgem-cpa { color: var(--accent); }
 
         @keyframes adforgem-rise {
-          to { opacity: 1; transform: translateY(0); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes adforgem-stamp {
+          from { opacity: 0; transform: translate(-50%, -50%) rotate(-6deg) scale(0.6); }
+          to { opacity: 1; transform: translate(-50%, -50%) rotate(-6deg) scale(1); }
         }
 
         @media (max-width: 480px) {
@@ -146,7 +199,11 @@ export default function AdforgeMockup() {
           .adforgem-caption { font-size: 7.5px; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .adforgem-cell { animation: none; opacity: 1; transform: none; }
+          .adforgem-cell {
+            animation: none; opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          .adforgem-winner { animation: none; opacity: 1; }
           .adforgem-wrap { animation: none; }
         }
       ` }} />
