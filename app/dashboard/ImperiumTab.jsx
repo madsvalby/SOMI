@@ -151,7 +151,7 @@ const STYLES = `
 `;
 
 function ProductCard({ p }) {
-  const href = `/imperium/${p.slug}/index.html`;
+  const href = `/imperium/${p.slug}`;
   return (
     <div className="imp-card">
       <div className="imp-bar" style={{ background: p.accent }} />
@@ -191,7 +191,7 @@ function ProductCard({ p }) {
 }
 
 function ExampleCard({ p }) {
-  const href = `/imperium/${p.slug}/index.html`;
+  const href = `/imperium/${p.slug}`;
   return (
     <div className="imp-ex">
       <div className="imp-ex-bar">
