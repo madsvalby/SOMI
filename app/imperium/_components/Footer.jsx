@@ -17,6 +17,7 @@ export default function Footer({ brand, copy }) {
                 {v.name}
               </a>
             ))}
+            <a href="/imperium/privacy">Privacy &amp; terms</a>
           </div>
         </div>
       </div>

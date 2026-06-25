@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { LEAD_ENDPOINT } from "../_data/ventures";
 
 // Lead-formular. POSTer til foundry-order edge function.
@@ -19,6 +19,8 @@ export default function LeadForm({
   const [values, setValues] = useState(init);
   const [msg, setMsg] = useState(null); // { text, kind: 'ok'|'err'|'pending' }
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const hpRef = useRef(null); // honeypot
 
   const set = (name) => (e) =>
     setValues((v) => ({ ...v, [name]: e.target.value }));
@@ -26,6 +28,8 @@ export default function LeadForm({
   const onSubmit = async (e) => {
     e.preventDefault();
     if (busy) return;
+    // honeypot: kun bots udfylder det skjulte felt → drop stille (vis "success" så botten intet lærer)
+    if (hpRef.current && hpRef.current.value) { setDone(true); return; }
     setBusy(true);
     setMsg({ text: "Sending…", kind: "pending" });
     try {
@@ -35,8 +39,8 @@ export default function LeadForm({
         body: JSON.stringify({ ...values, source }),
       });
       if (r.ok) {
-        setMsg({ text: successMsg, kind: "ok" });
         setValues(init);
+        setDone(true);
         // Lad Track-komponenten på siden logge konverteringen (kender sidens slug).
         try { window.dispatchEvent(new CustomEvent("imperium:lead", { detail: { source } })); } catch (e) {}
       } else {
@@ -96,6 +100,20 @@ export default function LeadForm({
     );
   };
 
+  if (done) {
+    return (
+      <div className="pe-form pe-form-done">
+        <div className="pe-form-check" aria-hidden="true">✓</div>
+        <p className="pe-form-done-title">{successMsg.replace(/^✓\s*/, "")}</p>
+        {note && (
+          <p className="pe-hero-fine" style={{ textAlign: "center", marginTop: 10 }}>
+            {note}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <form className="pe-form" onSubmit={onSubmit} noValidate>
       {pairRow ? (
@@ -103,6 +121,17 @@ export default function LeadForm({
       ) : (
         fields.map(renderField)
       )}
+
+      {/* honeypot — skjult for mennesker, fristende for bots; udfyldt → submission droppes */}
+      <input
+        ref={hpRef}
+        type="text"
+        name="company_url"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
 
       <button
         type="submit"

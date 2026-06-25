@@ -37,6 +37,11 @@
   overflow-x: hidden;
 }
 .pe ::selection { background: var(--accent); color: var(--ink); }
+/* synligt tastatur-fokus (a11y) — kun ved tastatur, ikke muse-klik */
+.pe a:focus-visible, .pe button:focus-visible, .pe summary:focus-visible,
+.pe input:focus-visible, .pe select:focus-visible, .pe textarea:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px;
+}
 .pe * { box-sizing: border-box; }
 .pe a { color: inherit; text-decoration: none; }
 .pe img, .pe svg { display: block; max-width: 100%; }
@@ -193,6 +198,10 @@ html { scroll-behavior: smooth; }
 .pe-form-msg { font-size: 13.5px; text-align: center; min-height: 18px; }
 .pe-form-msg.ok { color: var(--accent); }
 .pe-form-msg.err { color: var(--red); }
+.pe-form-done { text-align: center; padding: 34px 26px; }
+.pe-form-check { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto;
+  background: var(--accent-soft); color: var(--accent); font-size: 24px; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.pe-form-done-title { font-family: var(--serif); font-size: 21px; color: var(--bone); margin-top: 16px; line-height: 1.3; }
 
 /* ── FAQ ───────────────────────────────────────────────────────────────── */
 .pe-faq { display: flex; flex-direction: column; gap: 12px; }
