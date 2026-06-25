@@ -37,6 +37,8 @@ export default function LeadForm({
       if (r.ok) {
         setMsg({ text: successMsg, kind: "ok" });
         setValues(init);
+        // Lad Track-komponenten på siden logge konverteringen (kender sidens slug).
+        try { window.dispatchEvent(new CustomEvent("imperium:lead", { detail: { source } })); } catch (e) {}
       } else {
         setMsg({ text: "Something went wrong — please try again.", kind: "err" });
       }

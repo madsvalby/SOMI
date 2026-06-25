@@ -1,5 +1,6 @@
 import { Check, Home } from "lucide-react";
 import RevealRoot from "../_components/RevealRoot";
+import Track from "../_components/Track.jsx";
 import Nav from "../_components/Nav";
 import Footer from "../_components/Footer";
 import StatCounter from "../_components/StatCounter";
@@ -24,6 +25,7 @@ export default function ListingReelPage() {
       style={{ "--accent": ACCENT, "--glow": GLOW, "--accent-soft": SOFT }}
     >
       <RevealRoot />
+      <Track slug="listingreel" />
 
       <Nav
         brand="ListingReel"

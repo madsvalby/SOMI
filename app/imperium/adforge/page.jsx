@@ -3,6 +3,7 @@
 // Lead source POSTes som "ugc" (afviger bevidst fra slug — leads er allerede tagget sådan).
 import { Check, ArrowRight, ShieldCheck, Megaphone } from "lucide-react";
 import RevealRoot from "../_components/RevealRoot";
+import Track from "../_components/Track.jsx";
 import Nav from "../_components/Nav";
 import Footer from "../_components/Footer";
 import StatCounter from "../_components/StatCounter";
@@ -111,6 +112,7 @@ export default function AdforgePage() {
       style={{ "--accent": ACCENT, "--glow": GLOW, "--accent-soft": SOFT }}
     >
       <RevealRoot />
+      <Track slug="adforge" />
       <Nav
         brand="AdForge"
         icon={<Megaphone size={16} strokeWidth={2} />}

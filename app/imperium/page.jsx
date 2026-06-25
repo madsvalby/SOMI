@@ -1,5 +1,6 @@
 import { ArrowUpRight, Crown } from "lucide-react";
 import RevealRoot from "./_components/RevealRoot";
+import Track from "./_components/Track.jsx";
 import Nav from "./_components/Nav";
 import Footer from "./_components/Footer";
 import { VENTURES } from "./_data/ventures";
@@ -22,6 +23,7 @@ export default function ImperiumHub() {
       }}
     >
       <RevealRoot />
+      <Track slug="hub" />
 
       <Nav
         brand="Paper Empires"
