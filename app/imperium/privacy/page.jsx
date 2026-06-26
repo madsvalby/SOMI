@@ -7,7 +7,8 @@ export const metadata = {
   description: "How the Paper Empires group handles the data you submit, our cookie-free analytics, and the terms covering our AI-assisted services.",
 };
 
-const CONTACT = "hello@paperempires.com"; // TODO (Mads): sæt rigtig kontakt + entitet før offentlig launch
+const CONTACT = "hello@paperempires.com";
+const UPDATED = "June 2026";
 
 function Block({ title, children }) {
   return (
@@ -34,7 +35,9 @@ export default function PrivacyPage() {
           <h1 className="pe-h2" style={{ marginTop: 16 }}>Your data, in plain English.</h1>
           <p className="pe-lead" style={{ marginTop: 14 }}>
             This page covers the Paper Empires group and all its ventures (Faceless Foundry, ListingReel,
-            AdForge, Northgate Automation, Beacon and Ringback AI). We keep it short and honest.
+            AdForge, Northgate Automation, Beacon and Ringback AI). We keep it short and honest. Paper
+            Empires is the data controller for the information you submit, and you can reach us any time
+            at <a className="pe-accent" href={"mailto:" + CONTACT}>{CONTACT}</a>.
           </p>
 
           <Block title="What we collect">
@@ -80,7 +83,7 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <Footer brand="Paper Empires" copy="© 2026 · Privacy & terms" />
+      <Footer brand="Paper Empires" copy={"© 2026 Paper Empires · Privacy & terms · Last updated " + UPDATED} />
     </main>
   );
 }
