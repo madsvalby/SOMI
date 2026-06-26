@@ -359,7 +359,11 @@ export default function FacelessPage() {
             </h2>
             <p className="pe-lead pe-measure pe-center" style={{ margin: "12px auto 0" }}>
               Tell us your niche. We'll generate a real sample documentary clip
-              and email it to you. No call required.
+              and email it to you within 48 hours. No call required.
+            </p>
+            <p className="pe-hero-fine" style={{ marginTop: 10 }}>
+              Built on our own self-hosted render + voice engine — already in
+              production on full-length documentaries.
             </p>
           </div>
 
