@@ -176,6 +176,7 @@ export default function AdforgePage() {
             <StatCounter raw="31%" label="lower CPA in AI-UGC tests" i={2} />
             <StatCounter raw="∞" label="variants on a flat plan" i={3} />
           </div>
+          <p className="pe-stat-note">Illustrative industry figures, not performance guarantees.</p>
         </div>
       </section>
 

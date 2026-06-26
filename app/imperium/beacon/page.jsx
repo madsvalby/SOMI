@@ -166,6 +166,7 @@ export default function BeaconPage() {
               <StatCounter key={s.label} raw={s.raw} label={s.label} i={i} />
             ))}
           </div>
+          <p className="pe-stat-note">Illustrative industry figures, not performance guarantees.</p>
         </div>
       </section>
 

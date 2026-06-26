@@ -96,6 +96,7 @@ export default function ListingReelPage() {
             <StatCounter raw="2×" label="engagement of static posts" i={2} />
             <StatCounter raw="100%" label="your voice & branding" i={3} />
           </div>
+          <p className="pe-stat-note">Illustrative figures, not guarantees.</p>
         </div>
       </section>
 

@@ -163,6 +163,7 @@ export default function AutomationPage() {
             <StatCounter raw="$3.50" label="return per $1 (support AI)" i={2} />
             <StatCounter raw="100%" label="on your servers" i={3} />
           </div>
+          <p className="pe-stat-note">Illustrative industry figures, not performance guarantees.</p>
         </div>
       </section>
 

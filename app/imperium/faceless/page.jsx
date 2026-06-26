@@ -166,6 +166,7 @@ export default function FacelessPage() {
             <StatCounter raw="100%" label="your own cloned voice" i={2} />
             <StatCounter raw="$0" label="per-render SaaS fees" i={3} />
           </div>
+          <p className="pe-stat-note">Illustrative figures, not guarantees.</p>
         </div>
       </section>
 

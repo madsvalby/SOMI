@@ -112,6 +112,7 @@ export default function RingbackPage() {
               i={3}
             />
           </div>
+          <p className="pe-stat-note">Illustrative industry figures, not performance guarantees.</p>
         </div>
       </section>
 
