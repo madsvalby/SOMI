@@ -90,6 +90,14 @@ const WHY = [
   },
 ];
 
+// FAQ-data til JSON-LD (FAQPage). Spejler de synlige <details> nedenfor 1:1.
+const FAQ = [
+  { q: "Is my data really private?", a: "Yes — that's the whole point. Every automation runs on self-hosted n8n on your own infrastructure. The logic, the data and the API keys stay on your servers; nothing routes through a third-party cloud. It's structurally impossible for your customer data to leave your business." },
+  { q: "What can you automate first?", a: "We start with one high-ROI workflow tied to a single measurable KPI — usually lead-gen & outreach, customer-support triage, or automated reporting. The free audit maps your manual workflows and picks the one with the fastest payback." },
+  { q: "Do I need n8n already?", a: "No. We deploy self-hosted n8n on your infrastructure as part of the build, then hand over training and docs. There are no per-task fees — you get unlimited executions on your own servers." },
+  { q: "How fast to first result?", a: "After the free audit we build one high-impact automation, deploy it on your infra, and measure the KPI so you see the result — proof, not slides — before committing to a monthly retainer for monitoring and new workflows." },
+];
+
 export default function AutomationPage() {
   return (
     <main
@@ -99,7 +107,7 @@ export default function AutomationPage() {
     >
       <RevealRoot />
       <Track slug="automation" />
-      <VentureJsonLd slug="automation" />
+      <VentureJsonLd slug="automation" faqs={FAQ} />
 
       <Nav
         brand="Northgate Automation"

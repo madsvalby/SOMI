@@ -27,6 +27,14 @@ export const metadata = {
     "An AI receptionist that answers every call 24/7, books jobs, and captures every lead — so you never lose a customer to a missed call again.",
 };
 
+// FAQ-data til JSON-LD (FAQPage). Spejler de synlige <details> nedenfor 1:1.
+const FAQ = [
+  { q: "How quickly can it go live?", a: "Setup takes days, not months. We start with a free 2-week pilot on your number so you can hear it handling real calls before you commit to anything." },
+  { q: "Will callers know it's AI?", a: "Yes — every call discloses that it's AI-assisted, per regulations. The voice is natural and human-sounding, and on Pro we can clone your own brand voice." },
+  { q: "Does it book into my calendar?", a: "It checks your calendar, books the appointment, and confirms by SMS automatically — then texts you the caller's name, number, and the reason for the call in real time." },
+  { q: "What happens with emergencies?", a: "Urgent jobs are flagged and escalated immediately — it transfers the call to you or texts you on the spot, so you never miss the big ones." },
+];
+
 export default function RingbackPage() {
   return (
     <main
@@ -36,7 +44,7 @@ export default function RingbackPage() {
     >
       <RevealRoot />
       <Track slug="ringback" />
-      <VentureJsonLd slug="ringback" />
+      <VentureJsonLd slug="ringback" faqs={FAQ} />
 
       <Nav
         brand="Ringback AI"

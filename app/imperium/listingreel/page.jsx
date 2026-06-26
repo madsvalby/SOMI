@@ -20,6 +20,14 @@ export const metadata = {
     "Turn any property listing into a narrated, branded walkthrough video — in minutes, automatically. Built for real-estate agents. From $49/mo.",
 };
 
+// FAQ-data til JSON-LD (FAQPage). Spejler de synlige <details> nedenfor 1:1.
+const FAQ = [
+  { q: "Do I need any editing skills?", a: "None. You add the listing photos and key facts — ListingReel writes the script, narrates it, and assembles a finished branded reel for you. There's nothing to edit and no software to learn." },
+  { q: "Whose voice narrates?", a: "Yours. Record a 60-second voice sample once and every listing is narrated in your own cloned voice — one consistent narrator across every reel, not random AI voices." },
+  { q: "Can my whole team use it?", a: "Yes. The Brokerage plan adds your whole team under one account with a shared brand kit, an admin dashboard, and onboarding + support." },
+  { q: "Where does it post?", a: "Anywhere your buyers are. Download the finished reel or auto-publish straight to Instagram, TikTok, Facebook & YouTube — on brand, every time." },
+];
+
 export default function ListingReelPage() {
   return (
     <main
@@ -29,7 +37,7 @@ export default function ListingReelPage() {
     >
       <RevealRoot />
       <Track slug="listingreel" />
-      <VentureJsonLd slug="listingreel" />
+      <VentureJsonLd slug="listingreel" faqs={FAQ} />
 
       <Nav
         brand="ListingReel"
