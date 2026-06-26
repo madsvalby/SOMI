@@ -4,6 +4,7 @@
 import { Check, ArrowRight, ShieldCheck, Megaphone } from "lucide-react";
 import RevealRoot from "../_components/RevealRoot";
 import Track from "../_components/Track.jsx";
+import VentureJsonLd from "../_components/VentureJsonLd";
 import Nav from "../_components/Nav";
 import Footer from "../_components/Footer";
 import StatCounter from "../_components/StatCounter";
@@ -115,6 +116,7 @@ export default function AdforgePage() {
     >
       <RevealRoot />
       <Track slug="adforge" />
+      <VentureJsonLd slug="adforge" faqs={FAQ} />
       <Nav
         brand="AdForge"
         icon={<Megaphone size={16} strokeWidth={2} />}

@@ -1,6 +1,7 @@
 import { Check, Home } from "lucide-react";
 import RevealRoot from "../_components/RevealRoot";
 import Track from "../_components/Track.jsx";
+import VentureJsonLd from "../_components/VentureJsonLd";
 import Nav from "../_components/Nav";
 import Footer from "../_components/Footer";
 import StatCounter from "../_components/StatCounter";
@@ -28,6 +29,7 @@ export default function ListingReelPage() {
     >
       <RevealRoot />
       <Track slug="listingreel" />
+      <VentureJsonLd slug="listingreel" />
 
       <Nav
         brand="ListingReel"

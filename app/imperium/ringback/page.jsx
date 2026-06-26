@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import RevealRoot from "../_components/RevealRoot";
 import Track from "../_components/Track.jsx";
+import VentureJsonLd from "../_components/VentureJsonLd";
 import Nav from "../_components/Nav";
 import Footer from "../_components/Footer";
 import StatCounter from "../_components/StatCounter";
@@ -35,6 +36,7 @@ export default function RingbackPage() {
     >
       <RevealRoot />
       <Track slug="ringback" />
+      <VentureJsonLd slug="ringback" />
 
       <Nav
         brand="Ringback AI"
