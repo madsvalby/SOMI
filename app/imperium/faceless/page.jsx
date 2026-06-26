@@ -12,6 +12,8 @@ const GLOW = "rgba(201,161,78,0.18)";
 const SOFT = "rgba(201,161,78,0.14)";
 
 export const metadata = {
+  alternates: { canonical: "/imperium/faceless" },
+  openGraph: { url: "/imperium/faceless", title: "Faceless Foundry — Documentary-grade faceless videos, on autopilot" },
   title: "Faceless Foundry — Documentary-grade faceless videos, on autopilot",
   description:
     "Done-for-you faceless documentary videos with cloned-voice narration. 30+ branded videos a month, zero filming. Privacy-first and self-hosted.",

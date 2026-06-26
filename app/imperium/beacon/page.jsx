@@ -12,6 +12,8 @@ const GLOW = "rgba(124,92,203,0.20)";
 const SOFT = "rgba(124,92,203,0.16)";
 
 export const metadata = {
+  alternates: { canonical: "/imperium/beacon" },
+  openGraph: { url: "/imperium/beacon", title: "Beacon — Get your brand cited by AI" },
   title: "Beacon — Get your brand cited by AI",
   description:
     "Track and grow your visibility inside ChatGPT, Gemini, Perplexity & Google AI Overviews. Monitoring + done-for-you content that gets you cited. The new search is AI — be the answer.",

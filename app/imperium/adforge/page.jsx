@@ -15,6 +15,8 @@ const GLOW = "rgba(224,121,78,0.18)";
 const SOFT = "rgba(224,121,78,0.14)";
 
 export const metadata = {
+  alternates: { canonical: "/imperium/adforge" },
+  openGraph: { url: "/imperium/adforge", title: "AdForge — Unlimited AI UGC ads, flat monthly" },
   title: "AdForge — Unlimited AI UGC ads, flat monthly",
   description:
     "Done-for-you AI UGC video ads for e-commerce brands. Unlimited variants, flat monthly price, platform-compliant. The creative volume your ad account needs — without the per-video cost.",

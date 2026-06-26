@@ -19,6 +19,8 @@ const GLOW = "rgba(63,166,106,0.18)";
 const SOFT = "rgba(63,166,106,0.14)";
 
 export const metadata = {
+  alternates: { canonical: "/imperium/ringback" },
+  openGraph: { url: "/imperium/ringback", title: "Ringback AI — Never miss another customer call" },
   title: "Ringback AI — Never miss another customer call",
   description:
     "An AI receptionist that answers every call 24/7, books jobs, and captures every lead — so you never lose a customer to a missed call again.",

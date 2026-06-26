@@ -3,15 +3,16 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Check, ChevronDown, RotateCcw, ArrowRight, ExternalLink, Plus, Wallet,
   AlertTriangle, Radio, Rocket, LayoutGrid, ListChecks, Flag, Server, Cpu,
-  Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap, CircleDot, Lock,
+  Mic, X, Trash2, Sparkles, Image as ImageIcon, Zap,
   Wand2, Download, Loader2, TrendingUp, Coins, Activity,
-  Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch, Gauge,
-  Megaphone, MessageSquare, Pin, Facebook, Bot, FileText, Sun, Moon
+  Milestone, Shield, Database, Key, Eye, Pause, Banknote, GitBranch,
+  Megaphone, MessageSquare, Pin, Facebook, Bot, FileText, Sun, Moon, FlaskConical
 } from "lucide-react";
 import AgentsTab from "./AgentsTab";
 import PerformanceTab from "./PerformanceTab";
 import ReportsTab from "./ReportsTab";
 import ImperiumTab from "./ImperiumTab";
+import LabsTab from "./LabsTab";
 import CompanyRoadmaps from "./CompanyRoadmaps";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
@@ -123,7 +124,6 @@ const SEED_DONE = [
   "rm2","rm3","rm4","rm6",   // Roadmap: Kadence ✓ · Dashboard Fase 3 ✓ · Kommentar-AI ✓ · Self-host TTS ✓ (lokal stemmeklon, jun. 2026)
 ];
 
-const CASE_STATUS = { live: "Live", next: "Næste", queued: "Kø" };
 const nfDK = (n) => new Intl.NumberFormat("da-DK").format(Math.round(Number(n) || 0));
 const N8N_BASE = "https://madsvalby.app.n8n.cloud";
 const SEED_CHANNELS = [
@@ -323,6 +323,7 @@ const NAV_GROUPS = [
     { id: "kommende", label: "Kommende projekter", Icon: Rocket },
     { id: "roadmaps", label: "Roadmaps", Icon: Milestone },
     { id: "eksempler", label: "Eksempler", Icon: Sparkles },
+    { id: "labs", label: "Labs / AI Businesses", Icon: FlaskConical },
   ] },
 ];
 const NAV = NAV_GROUPS.flatMap((g) => g.tabs);
@@ -739,8 +740,6 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
   const pct = Math.round((doneCount / TOTAL) * 100);
   const alerts = credits.filter((c) => c.status === "lav" || c.status === "kritisk");
   const liveChannels = channels.filter((c) => c.status === "live").length;
-  const monthlyChars = Math.round(cadence * 4.33 * 14000);
-  const planPct = Math.round((monthlyChars / 131000) * 100);
   const monthlyUsd = Math.round(cadence * 4.33 * 8);
   const ttsSavedMo = monthlyUsd; // self-host TTS: sparet pr. md vs betalt TTS (nu $0)
   const gateDone = GATE.filter((_, i) => done.has("gate" + i)).length;
@@ -1214,6 +1213,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "kommende" && <ImperiumTab view="plans" />}
         {tab === "roadmaps" && <CompanyRoadmaps />}
         {tab === "eksempler" && <ImperiumTab view="examples" />}
+        {tab === "labs" && <LabsTab />}
 
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (

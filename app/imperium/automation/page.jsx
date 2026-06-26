@@ -25,7 +25,9 @@ const GLOW = "rgba(59,111,176,0.20)";
 const SOFT = "rgba(59,111,176,0.16)";
 
 export const metadata = {
-  title: "Northgate Automation — Privacy-first AI automation for your business",
+  alternates: { canonical: "/imperium/automation" },
+  openGraph: { url: "/imperium/automation", title: "Northgate Automation — Privacy-first AI automation" },
+  title: "Northgate Automation — Privacy-first AI automation",
   description:
     "We build self-hosted AI automations that run on your infrastructure. Your data never leaves your servers. Lead-gen, support, reporting and content — automated.",
 };

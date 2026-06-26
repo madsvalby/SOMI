@@ -12,6 +12,8 @@ const GLOW = "rgba(31,158,143,0.18)";
 const SOFT = "rgba(31,158,143,0.14)";
 
 export const metadata = {
+  alternates: { canonical: "/imperium/listingreel" },
+  openGraph: { url: "/imperium/listingreel", title: "ListingReel — Every listing becomes a video. Automatically." },
   title: "ListingReel — Every listing becomes a video. Automatically.",
   description:
     "Turn any property listing into a narrated, branded walkthrough video — in minutes, automatically. Built for real-estate agents. From $49/mo.",
