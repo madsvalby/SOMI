@@ -153,6 +153,7 @@ export default function BeaconPage() {
             </div>
             <div>
               <BeaconMockup />
+              <p className="pe-mock-note">Illustrative preview — sample data.</p>
             </div>
           </div>
         </div>

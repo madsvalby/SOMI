@@ -151,6 +151,7 @@ export default function AutomationPage() {
             </div>
             <div>
               <AutomationMockup />
+              <p className="pe-mock-note">Illustrative preview — sample data.</p>
             </div>
           </div>
         </div>

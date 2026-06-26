@@ -154,6 +154,7 @@ export default function FacelessPage() {
             </div>
             <div>
               <FacelessMockup />
+              <p className="pe-mock-note">Illustrative preview — sample data.</p>
             </div>
           </div>
         </div>

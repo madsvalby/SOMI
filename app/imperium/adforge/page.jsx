@@ -160,6 +160,7 @@ export default function AdforgePage() {
             </div>
             <div>
               <AdforgeMockup />
+              <p className="pe-mock-note">Illustrative preview — sample data.</p>
             </div>
           </div>
         </div>
