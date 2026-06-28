@@ -1,11 +1,14 @@
 import { ArrowUpRight, Crown } from "lucide-react";
 import RevealRoot from "./_components/RevealRoot";
 import Track from "./_components/Track.jsx";
+import HubJsonLd from "./_components/HubJsonLd";
 import Nav from "./_components/Nav";
 import Footer from "./_components/Footer";
 import { VENTURES } from "./_data/ventures";
 
 export const metadata = {
+  alternates: { canonical: "/imperium" },
+  openGraph: { url: "/imperium", title: "The Paper Empires Group — Six AI ventures, one factory" },
   title: "The Paper Empires Group — Six AI ventures, one factory",
   description:
     "Six near-zero-marginal-cost AI content & automation ventures built on one self-hosted render factory and a free local voice clone.",
@@ -24,6 +27,7 @@ export default function ImperiumHub() {
     >
       <RevealRoot />
       <Track slug="hub" />
+      <HubJsonLd />
 
       <Nav
         brand="Paper Empires"

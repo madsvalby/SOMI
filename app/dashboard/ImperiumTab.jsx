@@ -1,11 +1,14 @@
 "use client";
-import React, { useState } from "react";
-import { Rocket, ExternalLink, Check, Sparkles, TrendingUp, Wallet, Target, Star, ArrowUpRight, KeyRound } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Rocket, ExternalLink, Check, Sparkles, TrendingUp, Wallet, Target, Star, ArrowUpRight, KeyRound, BarChart3, Eye, MousePointerClick, Mail } from "lucide-react";
+
+const numFmt = new Intl.NumberFormat("da-DK");
+const nf = (n) => (n == null ? "0" : numFmt.format(n));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI-automations-imperiet — 6 venture-planer researchet jun. 2026.
-// Hver har en dyb research-rapport + launch-guide + live landing page (kopieret
-// til /public/imperium/<slug>/). Lead-backend er live (Supabase foundry_orders).
+// Hver har en dyb research-rapport + launch-guide + live landing page (Next.js-rute
+// i app/imperium/<slug>/). Lead-backend er live (Supabase foundry_orders).
 // Rød tråd: self-hosted render + gratis lokal stemmeklon = near-zero marginalkost.
 // ─────────────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -148,6 +151,26 @@ const STYLES = `
   .imp-ex-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; }
   .imp-ex-name { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--ink); }
   .imp-note { font-size: 12px; color: var(--bone-faint); margin-top: 18px; line-height: 1.55; }
+
+  .imp-funnel { margin-top: 26px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); padding: 20px 22px 18px; }
+  .imp-funnel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .imp-funnel-title { display: inline-flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink); }
+  .imp-funnel-tot { display: flex; gap: 14px; flex-wrap: wrap; }
+  .imp-funnel-tot .t { font-family: var(--mono); font-size: 11.5px; color: var(--bone-faint); }
+  .imp-funnel-tot .t b { color: var(--ink); font-weight: 600; }
+  .imp-funnel-tbl { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .imp-funnel-tbl th { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--bone-faint);
+    text-align: right; padding: 0 0 9px; font-weight: 600; border-bottom: 1px solid var(--line-soft); }
+  .imp-funnel-tbl th:first-child { text-align: left; }
+  .imp-funnel-tbl td { font-size: 13px; color: var(--bone-dim); text-align: right; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
+  .imp-funnel-tbl tr:last-child td { border-bottom: none; }
+  .imp-funnel-name { display: inline-flex; align-items: center; gap: 8px; text-align: left; color: var(--ink); font-weight: 600; font-size: 13px; }
+  .imp-funnel-name::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--dot, var(--gold)); flex-shrink: 0; }
+  .imp-funnel-tbl td b { color: var(--ink); font-weight: 600; }
+  .imp-funnel-cvr { color: var(--green); font-family: var(--mono); font-size: 12px; }
+  .imp-funnel-th-ic { display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end; }
+  .imp-funnel-empty { font-size: 12.5px; color: var(--bone-faint); margin-top: 14px; line-height: 1.5; }
+  .imp-funnel-foot { font-size: 11px; color: var(--bone-faint); margin-top: 12px; line-height: 1.45; }
 `;
 
 function ProductCard({ p }) {
@@ -216,6 +239,80 @@ function ExampleCard({ p }) {
   );
 }
 
+// Read-only funnel-kort: view → cta → lead pr. venture, fra imperium_events via
+// /api/imperium-stats. Samme fetch/tilstands-mønster som PerformanceTab (no-store +
+// loading/err-lede). Tom-tilstand når ingen events er logget endnu.
+function FunnelCard() {
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch("/api/imperium-stats", { cache: "no-store" });
+        if (!alive) return;
+        if (r.ok) setData(await r.json());
+        else setErr(true);
+      } catch (e) { if (alive) setErr(true); }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const ventures = (data && data.ventures) || [];
+  const totals = (data && data.totals) || {};
+  const anyEvents = totals.events > 0;
+
+  return (
+    <div className="imp-funnel">
+      <div className="imp-funnel-head">
+        <span className="imp-funnel-title"><BarChart3 size={17} strokeWidth={2} style={{ color: "var(--gold)" }} /> Funnel pr. venture</span>
+        {data && !err && (
+          <div className="imp-funnel-tot">
+            <span className="t"><b>{nf(totals.views)}</b> views</span>
+            <span className="t"><b>{nf(totals.cta)}</b> CTA-klik</span>
+            <span className="t"><b>{nf(totals.leads)}</b> leads</span>
+          </div>
+        )}
+      </div>
+
+      {err ? (
+        <p className="imp-funnel-empty">Kunne ikke hente funnel-data.</p>
+      ) : !data ? (
+        <p className="imp-funnel-empty">Henter funnel…</p>
+      ) : !anyEvents ? (
+        <p className="imp-funnel-empty">Ingen besøg logget endnu. Tæller view/CTA/lead pr. landingsside, så snart trafik rammer <code>/imperium/&lt;slug&gt;</code>.</p>
+      ) : (
+        <>
+          <table className="imp-funnel-tbl">
+            <thead>
+              <tr>
+                <th>Venture</th>
+                <th><span className="imp-funnel-th-ic"><Eye size={11} /> Views</span></th>
+                <th><span className="imp-funnel-th-ic"><MousePointerClick size={11} /> CTA</span></th>
+                <th><span className="imp-funnel-th-ic"><Mail size={11} /> Leads</span></th>
+                <th>CVR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ventures.map((v) => (
+                <tr key={v.slug}>
+                  <td><span className="imp-funnel-name" style={{ "--dot": v.accent }}>{v.name}</span></td>
+                  <td><b>{nf(v.views)}</b></td>
+                  <td>{nf(v.cta)}</td>
+                  <td><b>{nf(v.leads)}</b></td>
+                  <td className="imp-funnel-cvr">{v.views ? v.cvr + "%" : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="imp-funnel-foot">Anonyme funnel-tællinger (ingen PII) fra <code>imperium_events</code>. CVR = leads / views. CTA = klik på en hvilken som helst knap på siden.</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function ImperiumTab({ view = "plans" }) {
   return (
     <div className="imp-wrap">
@@ -232,7 +329,7 @@ export default function ImperiumTab({ view = "plans" }) {
           <div className="imp-ex-grid">
             {PRODUCTS.map((p) => <ExampleCard key={p.slug} p={p} />)}
           </div>
-          <p className="imp-note">Previewene indlæses som live-iframes (Tailwind via CDN + Google Fonts kræver internet). Kilde-filerne ligger i <code>public/imperium/&lt;slug&gt;/</code>.</p>
+          <p className="imp-note">Previewene indlæses som live-iframes fra selve appen (Next.js-ruter — ingen Tailwind-CDN, egen CSS). Kilde-filerne ligger i <code>app/imperium/&lt;slug&gt;/</code>.</p>
         </>
       ) : (
         <>
@@ -252,7 +349,8 @@ export default function ImperiumTab({ view = "plans" }) {
           <div className="imp-grid">
             {PRODUCTS.map((p) => <ProductCard key={p.slug} p={p} />)}
           </div>
-          <p className="imp-note">Fuld research + launch-guides ligger i <code>Desktop/imperium/</code>. Go-live kræver Mads' konti (domæner, entity/Stripe, betalte nøgler) — se “Hvad Mads skal bruge” pr. kort.</p>
+          <FunnelCard />
+          <p className="imp-note">Landingssiderne ligger i <code>app/imperium/&lt;slug&gt;/</code> (Next.js, egen CSS — ingen Tailwind-CDN). Go-live kræver Mads' konti (domæner, entity/Stripe, betalte nøgler) — se “Hvad Mads skal bruge” pr. kort.</p>
         </>
       )}
     </div>
