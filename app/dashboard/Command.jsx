@@ -326,9 +326,6 @@ const NAV_GROUPS = [
     { id: "eksempler", label: "Eksempler", Icon: Sparkles },
     { id: "labs", label: "Labs / AI Businesses", Icon: FlaskConical },
   ] },
-  { label: "Creator", tabs: [
-    { id: "vcl", label: "Virtual Creator Lab", Icon: Shield },
-  ] },
 ];
 const NAV = NAV_GROUPS.flatMap((g) => g.tabs);
 
@@ -1175,16 +1172,22 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </span>
           </div>
         )}
-        <div className="sc-chanbar" aria-label="Aktiv kanal">
+        <div className="sc-chanbar" aria-label="Aktiv kanal / workspace">
           {channels.map((c) => (
-            <button key={c.id} className={`sc-chanbar-pill ${activeChan === c.id ? "on" : ""}`}
-              style={{ "--p": c.accent }} onClick={() => pickChannel(c.id)} title={`Tema & kontekst: ${c.name}`}>
+            <button key={c.id} className={`sc-chanbar-pill ${tab !== "vcl" && activeChan === c.id ? "on" : ""}`}
+              style={{ "--p": c.accent }} onClick={() => { pickChannel(c.id); if (tab === "vcl") setTab("overblik"); }} title={`Tema & kontekst: ${c.name}`}>
               <span className="dot" />{c.name}
             </button>
           ))}
+          <span aria-hidden="true" style={{ width: 1, height: 18, background: "var(--line)", margin: "0 4px", alignSelf: "center" }} />
+          <button className={`sc-chanbar-pill ${tab === "vcl" ? "on" : ""}`}
+            style={{ "--p": "#A78BFA" }} onClick={() => setTab("vcl")} title="Virtual Creator Lab — separat brand (Sera)">
+            <Shield size={12} strokeWidth={2.2} style={{ marginRight: 3, verticalAlign: "-1px" }} />Virtual Creator
+          </button>
         </div>
 
-        {/* Nav — grupperet i klynger med skillelinjer */}
+        {/* Nav — skjult i Virtual Creator-workspace (VCL har sin egen sub-nav) */}
+        {tab !== "vcl" && (
         <nav className="sc-nav" aria-label="Sektioner">
           {NAV_GROUPS.map((g, gi) => (
             <React.Fragment key={gi}>
@@ -1203,6 +1206,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
             </React.Fragment>
           ))}
         </nav>
+        )}
 
         {/* ───────── AGENTER ───────── */}
         {tab === "agenter" && <AgentsTab />}
