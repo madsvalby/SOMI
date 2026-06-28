@@ -5,6 +5,74 @@
 
 ---
 
+## 2026-06-28 — Long-form reset + visuel rebrand (The Curator) + søge-SEO
+
+Stor strategisk kursændring efter at visningstimer kollapsede (Mads-alarm). Fuld diagnose + 2 ultracode-workflows + live pipeline-ændringer.
+
+**Diagnose (låst med YouTube Studio-data):** kanalen er fejlklassificeret som SHORTS-kanal → long-form kvæles ved distributionskilden. Diddy 21 eksponeringer/2 dage, Parmalat 7/1 dag, CTR umålbar; kun 5% browse. Ingen af 13 long-forms >46 lifetime views. "48-timers-panik" var halen efter ÉN viral shorts-spike 17-20/6 (peak 19/6: 2556 views), ikke algoritme-skade. Mads valgte **long-form reset** (ikke ny kanal/niche).
+
+**✅ Shorts-produktion stoppet:** MASTER-node "Kør shorts" (`8301cc26-...`, terminal efter Log upload) disabled + publiceret. SHORTS-wf kaldes kun herfra. Reversibelt. Long-form-kadence (man/ons/fre) uændret = allerede rigtig.
+
+**✅ Søge-SEO live (ultracode-workflow, 17 agenter, adversarielt verificeret):** SEO-noden "Claude: SEO + Thumbnail" opdateret med SEARCH-OPTIMISATION (high-intent modifiers "explained"/"what happened"/"scandal" front-loaded i titel+description+tags, FIT/NO-FIT-branches, exact-phrase-garanti). Alle live-guards (NAME-FIRST, LEGAL/MONETISATION, JSON-kontrakt) verificeret intakte. Søgning = vejen ud uden browse. Demand-rerank: HIGH = musk/openai, boeing, lehman, sackler, murdoch.
+
+**✅ Visuel rebrand live (ultracode-workflow, 13 agenter, 21 issues fanget+fikset):**
+- **THE CURATOR-maskot:** featureless matte-sort 3D-mannequin, blank oval (= "aldrig rigtige ansigter"-guard per design), guld rim-light (#C9A14E) + guld pocket square (bevarer noir/guld-DNA, ikke Lume's røde). Tøj skifter pr. sag, figur altid identisk. Gennemgående protagonist = brand-anker + retention-device.
+- **MASTER live (byte-verificeret, sha256/node):** SEO-node thumbnail (Curator som famous-case helt, højre 55-65%) + Produktionspakke image_prompts (Curator-token verbatim først + lysere key-lit 3D-stil + 28-36 billeder, 3 count-steder) + Split-suffix (ny 3D-render-stil). activeVersionId `9d224d06-...` (rollback: `22701028-...`).
+- **Voice (ærlig korrektion):** flere stemmer flytter ~intet; stemme-KVALITET gør. Skift robot-TTS → **ElevenLabs George** (voiceId `JBFqnCBsd6RMkjVDRZzb`) = +15-25% retention sek 0-45. Test-prøve genereret (Mads vurderer). Brian = backup (`nPczCjzI2devNBz1zQrb`), Callum citater (fremtid).
+
+**⬜ I gang / næste:**
+- Kø-reset (agent): dedup (`archegos_bridge_test`, `evergrande-79-billion` → abandoned) + reprioritér 11 emner efter demand + Lume-"the person who..."-vinkler.
+- **RUNDE 2 (test-gated):** (1) master-Curator-reference-billede som inlineData i Gemini-noden → ægte 80-90% figur-konsistens (prompt-only = kun 40-50% nu); (2) Byg-film-JSON: større Ken Burns (4/-4) + aktivér pan (pt. dead) + flimmer-clamp → ægte billed-dynamik (kræver 1 test-render); (3) voice FASE 2: skift `/opt/somi-tts` → ElevenLabs (SSH, stability 0.38). Render-økonomi: 28-36 billeder = +20-33% Gemini-kald (~$0.10→$0.13/video, OK).
+- ✅ YouTube-oprydning: **alle shorts skjult** i Studio (Mads, 28/6) → kanal nu ren long-form (accelererer re-klassificering). ⬜ Andrew Tate-doc (off-niche long-form) afventer. Slet intet (kun privat).
+
+Kill-gate uændret: dag 30 (~12/7) hvis ingen doc >40% retention + ingen video >1000 views + subs <50 → pivot format.
+
+### Autonom session (28/6, Mads væk) — Blok A + B
+- **Master-Curator-billede GENERERET + valideret** (vidiq, score 95/100): featureless matte-sort mannequin, blank oval, guld rim-light, premium 3D. Gemt `scratchpad/curator_v1.png` + base64. Wiring-opskrift fundet: produktionens Gemini-node skal bruge operation **`image:edit`** (ikke `generate`) m. master som binary (`images.values[].binaryPropertyName='data'`, cred `nRtyUTm7mgdq0rDL`); master hentes fra Drive. **Wiring-test kører i sandkasse** (rører ikke produktion) — afgør om image:edit giver konsistente scener FØR produktions-wiring (test-gated, lav-ingen-fejl).
+- **Niche-beslutning (ultracode, 6-agent research):** disciplineret **HYBRID "Fallen Empires"** = financial-kerne + NAVNGIVEN SØGT SKURK i hver video. Nøgle-indsigt: Tate's 26 views = navne-trafik (Tate = et af verdens mest søgte navne), IKKE arketype-sejr ("notorious downfall documentary" = 0 søgevol). INGEN pivot — true-crime halverer RPM ($8-12 financial → $3-6 true-crime) + bryder noir/guld-brand. INDE: finansielle skurke/institutioner/dynastier. UDE: Tate/Diddy-retssag/ren true-crime. "corporate collapse documentary" competition kun ~10 = vi sidder i højeste-RPM/laveste-konkurrence subniche.
+- **10 nye emner tilføjet til køen** (`add_data_table_rows`, status ready): FIFA (pri 1.5), Carlos Ghosn (4.5), Wells Fargo (5.5), McKinsey (14), Lex Greensill (15), Charlie Javice (16), MFS/Paresh Raja (17), Hin Leong (18), Nikola/Milton (19), Nordea (20). Source-tag `claude-niche-2026-06-28`.
+- ⚠️ **TIMING-FLAGS til Mads:** (1) **FIFA** — VM 2026 kører NU, vindue lukker ~midt juli; sat pri 1.5 (foran Boeing) — verificér decimal-priority holdt, ellers ryk frem manuelt. (2) **Adani** (#8) bør rykkes frem — DOJ-drop-deadline 13/7. (Begge kræver dataTable-update = QUEUE-RESET-mekanikken.)
+
+**Spor-resultater (alle landet):**
+- **Blok A — figur-konsistens BEVIST:** sandkasse-test af master-reference (gemini `image:edit`) = 9/10 konsistens; 3 scene-billeder (`scratchpad/curator_sceneA/B/C.jpg`), Musk-thumbnail (A) ser premium + on-brand ud (Curator højre, neural-orb, tekst-zone venstre). Produktions-wiring KLAR men test-gated → venter på Mads' testvideo-godkendelse (bundtet m. billed-dynamik + George).
+- **Blok C — imperium (4 forbedringer):** hub `canonical`+`og:url`+JSON-LD (Organization+ItemList), funnel-dashboard (`/api/imperium-stats` + FunnelCard, verificeret mod 52 ægte `imperium_events`), doc-oprydning. Build grøn. Branch `imperium-improvements-2026-06-28` (1 commit, IKKE pushet/merget/deployet, `main` urørt). Skema-note: `imperium_events` timestamp = `ts`. `metadataBase` ikke sat (bevidst/scope) → relative canonicals resolver mod localhost ved build (info, ufarligt; overvej `metadataBase` i `app/layout.jsx` senere).
+- **Runde 2-prep (kører):** bygger Byg-film-JSON-dynamik (flimmer-clamp + zoom 4/-4 + pan) + master-ref-node-config + George/ElevenLabs-plan klar-til-anvendelse (anvendes IKKE før Mads' go).
+
+**⏳ MADS' GODKENDELSES-LISTE (når tilbage):**
+1. **Runde 2 testvideo** → godkend → master-ref-wiring + billed-dynamik + George live i produktion.
+2. **Imperium-branch** `imperium-improvements-2026-06-28` review → merge/deploy.
+3. **FIFA-prioritet** (timing) + **Adani-fremrykning** (DOJ-deadline) — bekræft redaktionelt.
+4. **Multi-platform** (IG Reels først, TikTok via Buffer) — parkeret på Mads' ønske, klar når han vil.
+- Agent-IDs (denne session, til genoptag): node-apply `a89c128d`, kø-reset `a15ea7f5`, master-billede `a3dd7d68`, wiring-test `a366a4f1`, imperium `a79704b9`, Runde2-prep `a259f18e`.
+
+### Runde 2 ANVENDT (28/6, efter Mads' "bare kør den")
+- ⚠️ **n8n-bug opdaget:** SDK korrumperer store base64 i jsCode ved gem (1 byte, offset ~7343, reproducerbart) → inline-base64-figur-ref er upålidelig. **Løsning: Drive-hentet binary-ref.** Curator-master i Drive: fileId `12uVKwZi9HfeSyRcZFTLLGKR6ofYRtyx2` (`curator-master-ref.jpg`, 448px/5769B, integritet bekræftet).
+- ✅ **LIVE (ver `10c45b2b-21c7-4fc8-98ee-b1f6185dd6be`, rollback-anker `9afaf6ee`):** begge Gemini-billed-noder (hero + scene) på `image:edit` m. Drive-download-ref-noder ("Hent curator-ref (hero/scene)") + "Keep the exact mannequin figure from the reference unchanged". Gammel inline-inject deaktiveret. Byg-film-JSON: flimmer-clamp + zoom ±4 + pan left/right.
+- 🎬 **TESTVIDEO: n8n exec `849`** (startet 15:05 UTC, ~50-100 min render). Første fulde video i ny stil. **NÅR FÆRDIG — valider:** ny `videos`-række (case_id) + figur-konsistens i thumbnail/scener + om render-serveren honorerer `pan:'left'/'right'` + zoom ±4 (TEST-GATED; hvis ikke → sæt pan tilbage til `''` uden at røre clamp/zoom). Problem → publish `9afaf6ee` for fuld rollback.
+- ✅ **Voice-beslutning (Mads):** bliver på EGEN TTS (Chatterbox på render-VPS), IKKE ElevenLabs. George/ElevenLabs-plan droppet. Voice-forbedring = fremtidig finjustering inden for egen TTS.
+
+---
+
+## 2026-06-26 (forts. 2) — Render-speed + Diddy go-live + voice-track
+
+**Diddy ny-pacing godkendt af Mads ("langt bedre, vi kan gå live").** mp4: `renders/f9748d0c2bd0.mp4`. Afventer publicering (upload ny mp4 public + genbrug thumbnail + re-bridge yt_id; fjern gammel privat GWBBYfcdwnI).
+
+**Render-speed (Mads: "kan ikke bruge en time/video til kunder"). Diagnose:** 8 vCPU, 15Gi RAM, INGEN GPU. TTS ~50 min (5 segmenter SEKVENTIELT i `run_job`). Render ~50 min (caption-indbrænding `-preset medium` var den langsomme del; billed-klip allerede `veryfast`; whisper = `base.en`, allerede let).
+- **GJORT (sikker win):** server.js's 3 caption/final-encodes `-preset medium -crf 19` → `-preset fast` (samme crf, ~2x hurtigere encode, identisk kvalitet). Backup `server.js.bak-speed-pre`. Renderer genstartet.
+- **TTS-parallelisering UNDERSØGT → IKKE viabel på CPU:** torch sætter ingen num_threads i app.py → bruger default = alle cores for ÉN generering. At køre 2 samtidigt konkurrerer om samme cores (uklar/ingen netto-gevinst) + concurrent `MODEL.generate` på samme PyTorch-model = thread-safety-risiko på den fungerende kerne-TTS. Konklusion: implementér IKKE. (Note: load 4.4/8 antyder evt. delvis headroom, men kun multi-PROCES med 2× model-RAM ville udnytte det — høj risiko/lav sikkerhed.)
+- **GPU-POC VALIDERET (27/6, RTX 4090 på RunPod):** TTS **3,45x realtime** opvarmet (~4 min for 15-min-video vs ~50 min CPU = ~12x; cold-start var misvisende 0,5x), ffmpeg **NVENC-encode ~10x** (5,7s/60s 1080p). Samlet **~100 min → ~10-15 min/video**, **~$0.10/video** (~$3/md @ 1/dag, ~$60-100/md @ 30/dag). POC kostede ~$0.40. **Artefakt:** `somi-app/gpu-worker/` (Dockerfile + build.sh + README, commit d7d6217) — drop-in GPU-worker, peg pipeline-host på worker-IP. **Kritiske validerede pins** (chatterbox dependency-hell): torch 2.6.0+cu124 · transformers 4.46.3 · tokenizers 0.20.3 · huggingface-hub 0.25.2 · chatterbox-tts 0.1.7 · numpy 1.26.4 (install chatterbox→downgrade HF-stak m. --no-deps). Anbefalet: RunPod (RTX 4090, on-demand) til fabrik; Scaleway L4 (EU) til kunde-data. IKKE image-build-testet samlet endnu = deploy-tids-skridt. "Klar-gør-før-kunder", ikke akut (1 video/dag klares på CPU).
+- **GPU = den ægte unlock** for kunde-ruten: Chatterbox + ffmpeg(NVENC) + whisper alle 5-50x → ~100 min → ~10-15 min. Kræver Mads-beslutning (GPU-VPS ~$0.2-0.5/t el. dedikeret). Aligner med pressure-testens "beslut GPU før skalering".
+
+**Voice-polish-spor (Mads-feedback):**
+- ✅ **GJORT — forkortelses-glitch fixet.** Rod-årsag: `chunk_text` sætnings-split deler på `.`, så dotted-akronymer (B.I.G./L.A./U.S.) blev til bogstav-mini-"sætninger" m. pauser ("slutter mærkeligt"). Fix i `app.py` chunk_text: af-punktér `(?:[A-Za-z]\.){2,}` → mellemrums-bogstaver FØR splittet. Backup `app.py.bak-abbrev-pre`. py_compile OK, somi-tts genstartet. Gælder alle FREMTIDIGE renders (Diddy selv er pre-fix).
+- ⬜ **2-3 stemmer pr. genre** — rotér mellem flere klonede ref-stemmer (kræver flere ref-wavs + valg-logik i app.py). Fremtidig.
+
+**Lead-notifikation flyttet:** n8n-workflow `8ih1Gs7z2Wf88K26` toEmail → **somi.engine.media@gmail.com** (Mads-ønske). Re-publiceret + smoke-testet (exec #724 success).
+
+**⚠️ Diddy-publicering — restgæld før upload:** ny mp4 er 15:31, men `script_json.seo.yt_description` har kapitel-tidsstempler op til [24:00] (templede estimater, matcher ikke). Skal: beregn faktiske kapitel-tider (kumulativ scene-VO-varighed) EL. drop kapitler, FØR upload. Upload-plan: download mp4 → YouTube-node (cred NZTjBTYjUiV9JMoQ) unlisted + genbrug thumbnail `thumb_164540e17327.png` + tags/titel fra seo → Mads spot-tjek → flip public + re-bridge yt_id + fjern gammel privat GWBBYfcdwnI.
+
+---
+
 ## 2026-06-26 (forts.) — TTS-pacing-fix (Mads-feedback på Diddy)
 
 Mads så Diddy: (a) læses for hurtigt/stressende, (b) kapitel 1→2-overgang springer for brat, ét ord misses. Begge fixet i `/opt/somi-tts/app.py` (backup: `app.py.bak-pacing-20260626-173754`):
