@@ -13,6 +13,7 @@ import PerformanceTab from "./PerformanceTab";
 import ReportsTab from "./ReportsTab";
 import ImperiumTab from "./ImperiumTab";
 import LabsTab from "./LabsTab";
+import VirtualCreatorLab from "./VirtualCreatorLab";
 import CompanyRoadmaps from "./CompanyRoadmaps";
 import IdeaQueueBoard from "./IdeaQueueBoard";
 import CompetitorBenchmark from "./CompetitorBenchmark";
@@ -324,6 +325,9 @@ const NAV_GROUPS = [
     { id: "roadmaps", label: "Roadmaps", Icon: Milestone },
     { id: "eksempler", label: "Eksempler", Icon: Sparkles },
     { id: "labs", label: "Labs / AI Businesses", Icon: FlaskConical },
+  ] },
+  { label: "Creator", tabs: [
+    { id: "vcl", label: "Virtual Creator Lab", Icon: Shield },
   ] },
 ];
 const NAV = NAV_GROUPS.flatMap((g) => g.tabs);
@@ -1214,6 +1218,7 @@ Suggest 6 NEW, real, well-documented cases that fit this niche and would make gr
         {tab === "roadmaps" && <CompanyRoadmaps />}
         {tab === "eksempler" && <ImperiumTab view="examples" />}
         {tab === "labs" && <LabsTab />}
+        {tab === "vcl" && <VirtualCreatorLab />}
 
         {/* ───────── OVERBLIK ───────── */}
         {tab === "overblik" && (

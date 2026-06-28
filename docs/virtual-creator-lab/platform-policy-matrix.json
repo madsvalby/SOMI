@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Virtual Creator Lab — platform policy matrix",
+  "description": "Maskinlæsbar policy-status pr. domæne. Verificeret fra primærkilder + adversarielt tjekket. Persona-antagelse: photorealistisk, tydeligt AI-discloseret, 25+, ligner ingen rigtig person, SFW på Instagram.",
+  "last_checked": "2026-06-28",
+  "method": "16-agent research+verify workflow; kun primærkilder (platform-T&C/help, EUR-Lex, EU-Kommissionen, Kulturministeriet, Retsinformation)",
+  "not_legal_advice": true,
+  "persona_assumptions": {
+    "photorealistic": true,
+    "ai_disclosed": true,
+    "min_age_label": "25+",
+    "resembles_real_person": false,
+    "instagram_policy": "SFW_only"
+  },
+  "global_obligations": [
+    { "id": "disclosure_on_content", "rule": "AI-disclosure synlig på selve indholdet (bio + watermark + caption), ikke kun i T&C", "source_law": "EU AI Act art. 50(4)+50(5)", "effective": "2026-08-02" },
+    { "id": "machine_readable_marking", "rule": "Maskinlæsbar AI-mærkning i output (C2PA/Content Credentials); må ikke fjernes", "source_law": "EU AI Act art. 50(2)", "effective": "2026-08-02", "note": "Eksisterende systemer frist 2026-12-02 (foreløbig AI Omnibus-aftale)" },
+    { "id": "no_real_person_likeness", "rule": "Personaen må ikke ligne nogen konkret virkelig person", "source_law": "AI Act art. 3(60); DK § 73a; straffeloven § 264d/§ 264e", "effective": "now" },
+    { "id": "clearly_adult", "rule": "Tydeligt 25+; prompt/disclaimer redder ikke et mindreårigt udseende", "source_law": "platform-T&C + NCMEC-rapportering", "effective": "now" },
+    { "id": "bot_disclosure", "rule": "AI-chatbot skal oplyse at man taler med et AI-system", "source_law": "EU AI Act art. 50(1)", "effective": "2026-08-02" }
+  ],
+  "platforms": {
+    "fanvue": {
+      "role": "primær monetization",
+      "ai_content_allowed": "yes",
+      "persona_compatible": "yes",
+      "risk_level": "low",
+      "policy_score": 95,
+      "confidence": "high",
+      "key_conditions": [
+        "Konsekvent AI-disclosure (stol ikke kun på Fanvues auto-AI-tag)",
+        "Offentlig profil SFW (profilbillede/banner/intro-video/bio)",
+        "Ingen lighed med rigtig person eller under-18",
+        "Operatør (Mads) består KYC: gyldigt foto-ID + selfie/biometri",
+        "Skatteformular W-8BEN (ikke-US) før første payout",
+        "Max 15 AI-konti pr. verificeret identitet"
+      ],
+      "prohibited": ["AI-content uden disclosure", "lighed med rigtig person/under-18", "seksualiseret offentlig profil", "payout uden KYC"],
+      "sources": [
+        "https://help.fanvue.com/en/articles/9538738-is-ai-content-allowed-on-fanvue",
+        "https://help.fanvue.com/en/articles/14290142-how-do-i-know-if-a-creator-is-ai",
+        "https://help.fanvue.com/en/articles/9539091-passing-kyc-and-creating-multiple-accounts-as-an-ai-creator",
+        "https://legal.fanvue.com/community-guidelines",
+        "https://legal.fanvue.com/acceptable-use-policy"
+      ]
+    },
+    "fansly": {
+      "role": "betinget / sekundær",
+      "ai_content_allowed": "conditional",
+      "persona_compatible": "no",
+      "risk_level": "high",
+      "policy_score": 25,
+      "confidence": "high",
+      "decision": "incompatible_for_photorealistic",
+      "key_conditions": [
+        "Photorealistisk/lifelike AI er FORBUDT (inkl. deepfakes/face-swaps)",
+        "Kun non-photorealistic virtuel entitet tilladt",
+        "Operatør verificerer egen rigtig identitet + foto-ID FØR launch",
+        "AI-chat skal have menneskeligt opsyn"
+      ],
+      "prohibited": ["photorealistisk AI-persona", "deepfakes/face-swap", "fuldt autonom AI-chat", "impersonation uden samtykke"],
+      "action": "Markér 'incompatible' i dashboard medmindre der laves en klart ikke-fotorealistisk variant.",
+      "sources": ["https://help.fansly.com/en/articles/12315578-ai-generated-content-on-fansly"]
+    },
+    "instagram": {
+      "role": "SFW discovery-funnel",
+      "ai_content_allowed": "conditional",
+      "persona_compatible": "conditional",
+      "risk_level": "medium",
+      "policy_score": 80,
+      "confidence": "high",
+      "key_conditions": [
+        "ALT indhold strengt SFW (AI-nøgenhed behandles som ægte og fjernes)",
+        "Forvent demotion af suggestivt indhold i Explore/Reels",
+        "Selv-disclosure/AI-label på fotorealistisk AI-video + realistisk lyd (krav)",
+        "Behold C2PA/IPTC-metadata fra genereringsværktøjet",
+        "Funnel til paid må ikke udgøre seksuel solicitation på IG"
+      ],
+      "prohibited": ["synlig nøgenhed/seksuel aktivitet (også AI)", "AI-video uden disclosure-label", "seksuel solicitation", "NCII/deepfake-intime billeder"],
+      "sources": [
+        "https://transparency.meta.com/policies/community-standards/adult-nudity-sexual-activity/",
+        "https://about.fb.com/news/2024/02/labeling-ai-generated-images-on-facebook-instagram-and-threads/",
+        "https://transparency.meta.com/policies/community-standards/sexual-solicitation/"
+      ]
+    },
+    "instagram_dm_automation": {
+      "role": "DM / safe routing",
+      "ai_content_allowed": "conditional",
+      "persona_compatible": "conditional",
+      "risk_level": "high",
+      "policy_score": 45,
+      "confidence": "high",
+      "key_conditions": [
+        "Kun officiel Instagram Messaging API (Graph) på professional-konto",
+        "Strengt reaktivt: bruger skriver først; 24t-svarvindue",
+        "Uden for vindue kun human_agent-tag (≤7 dage)",
+        "Bot-disclosure ved samtalestart; svar ≤30 sek",
+        "Voks organisk — ingen auto-follow/like/comment, ingen købt engagement"
+      ],
+      "prohibited": ["kold/uopfordret DM", "3.-parts login-bots", "købt engagement", "høj-frekvent automation", "scraping/rate-limit-omgåelse"],
+      "note": "Ban-risikoen ligger på ADFÆRD, ikke på at personaen er AI.",
+      "sources": [
+        "https://developers.facebook.com/docs/messenger-platform/policy/policy-overview/",
+        "https://developers.facebook.com/docs/messenger-platform/instagram/features/human-agent-escalation/",
+        "https://transparency.meta.com/policies/community-standards/spam/",
+        "https://help.instagram.com/263751177667145"
+      ]
+    },
+    "landing_page": {
+      "role": "offentlig link-hub (separat brand, IKKE på SOMI-domænet)",
+      "provider": "AllMyLinks",
+      "hub_url": "https://allmylinks.com/seraphine-sera",
+      "status": "live",
+      "fallback": "/sera (egen side, beholdt til evt. eget domæne)",
+      "ai_content_allowed": "yes",
+      "persona_compatible": "yes",
+      "risk_level": "low",
+      "policy_score": 90,
+      "confidence": "high",
+      "key_conditions": [
+        "18+ notice / sensitive-content = ON",
+        "tydelig AI-disclosure i bio + about",
+        "ingen eksplicit public content; profil/baggrund SFW (AllMyLinks ToS forbyder eksplicit profil-upload)",
+        "ingen on-page-monetering af adult-links (kun link-ud)",
+        "UTM på alle outbound links",
+        "separat brand fra Paper Empires (ekstern hub undgår /imperium-kobling)"
+      ],
+      "sources": ["https://allmylinks.com/terms"]
+    }
+  },
+  "legal": {
+    "eu_ai_act": {
+      "domain": "EU AI Act (Forordning 2024/1689) art. 50",
+      "stance": "transparens påkrævet, ikke forbud",
+      "risk_level": "low",
+      "effective": "2026-08-02",
+      "key_rules": [
+        "Art. 50(2): provider markerer syntetisk output maskinlæsbart",
+        "Art. 50(4): deployer oplyser deepfake/AI-genereret — realisme-test (art. 3(60)), gælder selv uden rigtig person",
+        "Disclosure i T&C alene er ikke nok",
+        "Code of Practice (2026-06-10, frivillig) → formodning om compliance; signatur-frist 2026-07-22"
+      ],
+      "sources": ["https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng", "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50", "https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content"]
+    },
+    "denmark": {
+      "domain": "Dansk ret: § 73a digitale efterligninger, § 264d/§ 264e, NCII, GDPR",
+      "stance": "syntetisk persona uden lighed med rigtig person falder udenfor",
+      "risk_level": "medium",
+      "key_rules": [
+        "§ 73a-udkast (i kraft ~2026-03-31) beskytter kun virkelige/identificerbare personer; parodi/satire fortsat tilladt",
+        "§ 264d (privatlivsbilleder) + § 264e (identitetsmisbrug) kræver en konkret virkelig person",
+        "GDPR art. 9: udtrykkeligt samtykke ved seksualliv/biometri om VIRKELIGE kunder"
+      ],
+      "open_items": ["§ 73a endelig PDF (403 under research) → advokat læser før launch"],
+      "sources": ["https://kum.dk/aktuelt/nyheder/bred-aftale-om-deepfakes-giver-alle-ret-til-egen-krop-og-egen-stemme", "https://hoeringsportalen.dk/Hearing/Details/70269", "https://gdpr-info.eu/art-9-gdpr/"]
+    }
+  },
+  "payments": {
+    "sfw_path": {
+      "processor": "mainstream (Stripe e.l.)",
+      "risk_level": "low",
+      "note": "SFW udløser ikke adult-card-brand-regler; læs processorens egen AUP."
+    },
+    "adult_path": {
+      "processor": "CCBill / Segpay (mainstream afviser)",
+      "risk_level": "medium",
+      "key_rules": [
+        "AI er ingen smutvej: Mastercard-samtykke gælder 'uploaded or generated'; Segpay forbyder 'AI-generated and computer content'",
+        "Krav: alders-/identitets-/samtykke-verifikation af afbildede, forhåndsmoderation, takedown <7 hverdage, månedlig rapport",
+        "Segpay AI-sites: closed-loop, merchant-ejet aldersverificeret model-bibliotek, likeness-samtykke, chat-monitorering"
+      ],
+      "open_items": ["payout-reserves/hold-perioder er sekundære → verificér i underskrevet merchant-aftale"],
+      "sources": ["https://corporate.visa.com/en/about-visa/visa-network-integrity.html", "https://www.newsroom.mastercard.com", "https://gethelp.segpay.com"]
+    }
+  },
+  "ai_tooling": {
+    "suggestive_non_explicit": {
+      "recommended_by_tos": ["xAI/Grok", "Leonardo.ai"],
+      "prohibited_for_purpose": ["Midjourney", "Adobe Firefly", "Stability (hosted, efter 2025-07-31)", "Kling"],
+      "policy_vs_model_gap": ["OpenAI", "Google"],
+      "risk_level": "medium",
+      "confidence": "high",
+      "notes": [
+        "xAI/Grok + Leonardo forbyder kun real-person/explicit per skreven ToS",
+        "Midjourney forbyder al 'sexualized imagery' (SFW-only)",
+        "OpenAI 'adult mode' og Leonardo 'NSFW-toggle' er IKKE i ToS — ubekræftet",
+        "Hold output under Metas near-nudity-grænse så det også bliver på Instagram",
+        "Bevar C2PA/Content Credentials (EU AI Act art. 50(2))"
+      ],
+      "open_items": ["test faktisk filter-adfærd (ToS ≠ model-output)", "xAI AUP mærket 'previous version' → tjek nyeste"],
+      "sources": ["https://x.ai/legal/acceptable-use-policy", "https://leonardo.ai/terms-of-service", "https://docs.midjourney.com/hc/en-us/articles/32013696484109-Community-Guidelines", "https://openai.com/policies/usage-policies/", "https://policies.google.com/terms/generative-ai/use-policy"]
+    }
+  }
+}
