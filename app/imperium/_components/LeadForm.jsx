@@ -158,6 +158,16 @@ export default function LeadForm({
           {note}
         </p>
       )}
+
+      {/* GDPR: lawful basis + privacy link at the point of collection */}
+      <p className="pe-hero-fine" style={{ textAlign: "center", marginTop: -4 }}>
+        By submitting you agree we may use these details to follow up on your
+        enquiry. See our{" "}
+        <a className="pe-accent" href="/imperium/privacy">
+          Privacy &amp; terms
+        </a>
+        .
+      </p>
     </form>
   );
 }

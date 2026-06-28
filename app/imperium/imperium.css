@@ -95,7 +95,10 @@ html { scroll-behavior: smooth; }
 .pe-nav-links { display: flex; align-items: center; gap: 30px; }
 .pe-nav-links a { font-size: 13.5px; color: var(--dim); transition: color .15s ease; }
 .pe-nav-links a:hover { color: var(--bone); }
-.pe-nav-cta { display: none; }
+/* nav CTA hidden by default; shown only ≥901px (rule below). Uses .pe-nav-cta.pe-btn
+   so it outranks the later ".pe-btn { display:inline-flex }" rule and actually stays
+   hidden on mobile — otherwise the CTA + burger both render and the brand wraps. */
+.pe-nav-cta.pe-btn { display: none; }
 .pe-burger { display: none; background: none; border: 1px solid var(--line); color: var(--bone); border-radius: 9px; width: 40px; height: 38px; cursor: pointer; align-items: center; justify-content: center; }
 .pe-mobile-menu { display: none; flex-direction: column; gap: 4px; padding: 8px 24px 18px; border-bottom: 1px solid var(--line); background: rgba(11,15,20,0.95); }
 .pe-mobile-menu.open { display: flex; }
@@ -268,12 +271,17 @@ html { scroll-behavior: smooth; }
   .pe-nav-links { display: none; }
   .pe-burger { display: inline-flex; }
   .pe-section { padding: 70px 0; }
+  /* the eyebrow pill wraps to 2 lines on narrow screens — let it wrap cleanly:
+     dot leads the first line (not floating mid-block), and the text gets a
+     readable line-height + a touch more vertical padding so it isn't cramped. */
+  .pe-eyebrow { align-items: flex-start; line-height: 1.5; padding-top: 7px; padding-bottom: 7px; }
+  .pe-eyebrow .pe-dot { margin-top: 6px; }
 }
 @media (max-width: 540px) {
   .pe-grid-4, .pe-form-row { grid-template-columns: 1fr; }
   .pe-container { padding: 0 18px; }
 }
-@media (min-width: 901px) { .pe-nav-cta { display: inline-flex; } }
+@media (min-width: 901px) { .pe-nav-cta.pe-btn { display: inline-flex; } }
 
 /* respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
