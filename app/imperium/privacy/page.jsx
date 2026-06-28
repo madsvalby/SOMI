@@ -35,9 +35,9 @@ export default function PrivacyPage() {
           <h1 className="pe-h2" style={{ marginTop: 16 }}>Your data, in plain English.</h1>
           <p className="pe-lead" style={{ marginTop: 14 }}>
             This page covers the Paper Empires group and all its ventures (Faceless Foundry, ListingReel,
-            AdForge, Northgate Automation, Beacon and Ringback AI). We keep it short and honest. Paper
-            Empires is the data controller for the information you submit, and you can reach us any time
-            at <a className="pe-accent" href={"mailto:" + CONTACT}>{CONTACT}</a>.
+            AdForge, Northgate Automation, Beacon and Ringback AI). We keep it short and honest. The data
+            controller for the information you submit is <strong>Paper Empires, Denmark</strong>, and you
+            can reach us any time at <a className="pe-accent" href={"mailto:" + CONTACT}>{CONTACT}</a>.
           </p>
 
           <Block title="What we collect">
